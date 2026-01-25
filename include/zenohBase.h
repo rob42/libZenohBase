@@ -10,8 +10,6 @@
 #include <PicoSyslog.h>
 #include <Preferences.h>
 #include <LittleFS.h>
-#include <N2kTypes.h>
-#include <N2kMessages.h>
 
 // remote syslog server for logs
 #define RSYSLOG_IP "192.168.1.125"
