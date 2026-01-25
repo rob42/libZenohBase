@@ -108,7 +108,7 @@ void initOTA()
 }
 
 void saveCredentials(const char* ssid, const char* password) {
-  preferences.begin("wifi-config", false);
+  preferences.begin("nvs", false);
   preferences.putString("ssid", ssid);
   preferences.putString("password", password);
   preferences.end();
@@ -133,6 +133,7 @@ void configWifi(){
     String password = request->arg("password");
     saveCredentials(ssid.c_str(),password.c_str());
     request->send(200, "text/plain", "Success! IP: " + WiFi.localIP().toString());
+    wifiNode.config=true;
   });
   server.begin();
   //now wait for config to be done
