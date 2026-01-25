@@ -121,8 +121,8 @@ void configWifi(){
   Serial.print("AP IP address: ");
   Serial.println(IP);
   
-  //start an async web server
-  LittleFS.begin();
+  //start an async web server, format if it fails to mount
+  LittleFS.begin(true);
   AsyncWebServer server(80);
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(LittleFS, "/config.html");
