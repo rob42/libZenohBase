@@ -3,20 +3,17 @@
 PicoSyslog::Logger syslog("base");
 ZenohNode zenoh;
 
-// web server
-const char *ssid = "Foxglove-2g";
-const char *password = "foxglove16.4";
-
-WifiNode wifiNode(ssid, password);
+WifiNode wifiNode;
 WebServerNode webServerNode;
 
 JSONVar readings;
 unsigned long zenohLastTime = 0;
 unsigned long zenohTimerDelay = 1000;
-
+Preferences preferences;
 
 #ifdef LIB_COMPILE_ONLY
-
+//we need this (in arduino) to be able to compile the lib standalone during lib dev.
+//not included when building a project using the lib.
  void setup()
  {
     //dummy
@@ -110,12 +107,58 @@ void initOTA()
   ArduinoOTA.begin();
 }
 
+void saveCredentials(const char* ssid, const char* password) {
+  preferences.begin("wifi-config", false);
+  preferences.putString("ssid", ssid);
+  preferences.putString("password", password);
+  preferences.end();
+}
+
+void configWifi(){
+  WiFi.softAP("EspZenohBase");
+
+  IPAddress IP = WiFi.softAPIP();
+  Serial.print("AP IP address: ");
+  Serial.println(IP);
+  
+  //start an async web server
+  LittleFS.begin();
+  AsyncWebServer server(80);
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send(LittleFS, "/config.html");
+  });
+  //handle a POST
+  server.on("/connect", HTTP_POST, [](AsyncWebServerRequest *request){
+    String ssid = request->arg("ssid");
+    String password = request->arg("password");
+    saveCredentials(ssid.c_str(),password.c_str());
+    request->send(200, "text/plain", "Success! IP: " + WiFi.localIP().toString());
+  });
+  server.begin();
+  //now wait for config to be done
+  while(!wifiNode.config){
+    //wait a bit
+    sleep(1);
+  }
+  //done now
+  server.end();
+}
+
 void baseInit()
 {
   Serial.begin(115200);
   syslog.server = RSYSLOG_IP;
   syslog.default_loglevel = PicoSyslog::LogLevel::debug;
+  //check if wifi is configured
+  String ssid = preferences.getString("ssid", "");
+  String passwd = preferences.getString("passwd", "");
 
+  if(ssid.length()<1){
+    //jump to web config
+    configWifi();
+  }
+  
+  wifiNode.setAccessPoint(ssid.c_str(),passwd.c_str());
   wifiNode.init();
   // wait for connection
   while (!wifiNode.isConnected() || !wifiNode.ready)

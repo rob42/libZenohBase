@@ -9,8 +9,14 @@ class WifiNode {
     const char* ssid;
     const char* password;
     bool ready = false;
-    WifiNode(const char* ssid, const char* password) : ssid(ssid), password(password) {}
+    bool config = false;
+   // WifiNode() {}
 
+    void setAccessPoint(const char* ssid, const char* password){
+        ssid = ssid;
+        password = password;
+        config=true;
+    }
     void onStationConnected(WiFiEvent_t event, WiFiEventInfo_t info) {
         Serial.println("Connected to AP successfully!");
     }
