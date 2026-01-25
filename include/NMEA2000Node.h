@@ -9,7 +9,7 @@
 #include <PicoSyslog.h>
 
 extern PicoSyslog::Logger syslog;
-Preferences preferences;
+extern Preferences preferences;
 class NMEA2000Node
 {
 public:
