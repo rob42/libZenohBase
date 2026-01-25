@@ -53,11 +53,11 @@ public:
         if (modbus.requestFrom(slaveId, 0x03, windSpeedReg, 2) > 0) {
             syslog.debug.println(" found..");
             aws_raw = modbus.uint16(0);
-            aws_ms = aws_raw / 100.0;
+            aws_ms = aws_raw * 0.01; //divide 100
             aws = aws_ms * 1.943844;
             awa_raw = modbus.uint16(1);
             last_awa = awa;
-            awa = (awa_raw / 10.0);
+            awa = (awa_raw * 0.1); //divide 10
         } else {
             syslog.error.println("Modbus read failed, retrying...");
         }

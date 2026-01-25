@@ -1,11 +1,12 @@
 {
     "name": "libNode",
     "version": "0.0.1",
-    "description": "A library of esp32 classes (nodes) to share simplified connection wrappers to various systems and devices",
+    "description": "A library of esp32 classes (nodes) to share simplified connection wrappers for signalk over zenoh",
     "keywords": [
         "esp32",
         "signalk",
         "arduino",
+        "zenoh",
         "pubsub",
         "publish",
         "subscribe",
@@ -28,7 +29,7 @@
         "arduino"
     ],
     "headers": [
-        "libNode.h"
+        "zenohBase.h"
     ],
     "examples": [
         "examples"
