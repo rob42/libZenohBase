@@ -1,5 +1,5 @@
 {
-    "name": "libNode",
+    "name": "libZenohBase",
     "version": "0.0.1",
     "description": "A library of esp32 classes (nodes) to share simplified connection wrappers for signalk over zenoh",
     "keywords": [
@@ -13,10 +13,10 @@
         "query",
         "distributed data distribution"
     ],
-    "homepage": "https://github.com/rob42/libNode/",
+    "homepage": "https://github.com/rob42/libZenohBase/",
     "repository": {
         "type": "git",
-        "url": "https://github.com/rob42/libNode"
+        "url": "https://github.com/rob42/libZenohBase"
     },
     "authors": {
         "name": "Robert Huitema",
