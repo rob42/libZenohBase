@@ -13,8 +13,8 @@ class WifiNode {
    // WifiNode() {}
 
     void setAccessPoint(const char* ssid, const char* password){
-        ssid = ssid;
-        password = password;
+        WifiNode::ssid = ssid;
+        WifiNode::password = password;
         config=true;
     }
     void onStationConnected(WiFiEvent_t event, WiFiEventInfo_t info) {
@@ -54,6 +54,8 @@ class WifiNode {
         WiFi.onEvent([this](WiFiEvent_t event, WiFiEventInfo_t info){ onStationConnected(event, info); }, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_CONNECTED);
         WiFi.onEvent([this](WiFiEvent_t event, WiFiEventInfo_t info){ onGotIP(event, info); }, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_GOT_IP);
         WiFi.onEvent([this](WiFiEvent_t event, WiFiEventInfo_t info){ onStationDisconnected(event, info); }, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_DISCONNECTED);
+        Serial.print("Using SSID: ");
+        Serial.println(ssid);
         WiFi.begin(ssid, password);
         WiFi.setTxPower(WIFI_POWER_15dBm);
         Serial.print("Connecting to WiFi ..");

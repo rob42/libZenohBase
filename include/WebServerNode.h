@@ -21,7 +21,7 @@ public:
     // Create an Event Source on /events
     AsyncEventSource events;
     // Json Variable to hold data (Sensor Readings)
-    JSONVar readings;
+    JSONVar webReadings = JSONVar();
 
     unsigned long webLastTime = 0;
     unsigned long webTimerDelay = 1000;
@@ -43,7 +43,7 @@ public:
         server.serveStatic("/", LittleFS, "/");
         server.on("/readings", HTTP_GET, [this](AsyncWebServerRequest *request)
                   {
-            String json = JSON.stringify(readings);
+            String json = JSON.stringify(webReadings);
             request->send(200, "application/json", json); });
         events.onConnect([](AsyncEventSourceClient *client)
                 {
@@ -60,13 +60,13 @@ public:
         if ((millis() - webLastTime) > webTimerDelay)
         {
             events.send("ping", NULL, millis());
-            events.send(JSON.stringify(readings).c_str(), "new_readings", millis());
+            events.send(JSON.stringify(webReadings).c_str(), "new_readings", millis());
             webLastTime = millis();
         }
     }
 
     void setSensorData(const char* key, double value){
-        readings[key] = value; // String(bme.readTemperature());
+        webReadings[key] = value; // String(bme.readTemperature());
     }
 
 };

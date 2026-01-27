@@ -6,7 +6,7 @@ ZenohNode zenoh;
 WifiNode wifiNode;
 WebServerNode webServerNode;
 
-JSONVar readings;
+JSONVar baseReadings = new JSONVar();
 unsigned long zenohLastTime = 0;
 unsigned long zenohTimerDelay = 1000;
 Preferences preferences;
@@ -64,7 +64,7 @@ void processZenoh()
 {
   if ((millis() - zenohLastTime) > zenohTimerDelay)
   {
-    if (!zenoh.publish(KEYEXPR, JSON.stringify(readings).c_str()))
+    if (!zenoh.publish(KEYEXPR, JSON.stringify(baseReadings).c_str()))
     {
       syslog.error.println("Publish failed (node not running?)");
       if (!zenoh.isRunning())
@@ -107,14 +107,23 @@ void initOTA()
   ArduinoOTA.begin();
 }
 
-void saveCredentials(const char* ssid, const char* password) {
+void saveCredentials(String ssid, String password) {
   preferences.begin("nvs", false);
+  preferences.clear();
   preferences.putString("ssid", ssid);
   preferences.putString("password", password);
+  
+  Serial.print("SSID saved: ");
+  Serial.println(ssid);
+  Serial.print("SSID retrieved: ");
+  Serial.println(preferences.getString("ssid"));
+
   preferences.end();
 }
 
 void configWifi(){
+  WiFi.disconnect();
+  wifiNode.config=false;
   WiFi.softAP("EspZenohBase");
 
   IPAddress IP = WiFi.softAPIP();
@@ -131,11 +140,12 @@ void configWifi(){
   server.on("/connect", HTTP_POST, [](AsyncWebServerRequest *request){
     String ssid = request->arg("ssid");
     String password = request->arg("password");
-    saveCredentials(ssid.c_str(),password.c_str());
+    saveCredentials(ssid,password);
     request->send(200, "text/plain", "Success! IP: " + WiFi.localIP().toString());
     wifiNode.config=true;
   });
   server.begin();
+  Serial.println("Config server started...");
   //now wait for config to be done
   while(!wifiNode.config){
     //wait a bit
@@ -143,6 +153,7 @@ void configWifi(){
   }
   //done now
   server.end();
+  Serial.println("Config server stopped");
 }
 
 void baseInit()
@@ -151,8 +162,11 @@ void baseInit()
   syslog.server = RSYSLOG_IP;
   syslog.default_loglevel = PicoSyslog::LogLevel::debug;
   //check if wifi is configured
+  preferences.begin("nvs", false);
   String ssid = preferences.getString("ssid", "");
-  String passwd = preferences.getString("passwd", "");
+  Serial.print("SSID: ");
+  Serial.println(ssid);
+  String passwd = preferences.getString("password", "");
 
   if(ssid.length()<1){
     //jump to web config
@@ -162,9 +176,18 @@ void baseInit()
   wifiNode.setAccessPoint(ssid.c_str(),passwd.c_str());
   wifiNode.init();
   // wait for connection
+  // try for 5 minutes fallback to host mode.
+  int count = 0;
   while (!wifiNode.isConnected() || !wifiNode.ready)
   {
-    delay(10);
+    delay(100);
+    count++;
+    if(count>300){  //30 sec
+      count = 0;
+      configWifi();
+      //need to reboot now
+      ESP.restart();
+    }
   }
   delay(1000);
   syslog.print("Wifi connected : ");
