@@ -64,7 +64,7 @@ void processZenoh()
 {
   if ((millis() - zenohLastTime) > zenohTimerDelay)
   {
-    if (!zenoh.publish(KEYEXPR, JSON.stringify(baseReadings).c_str()))
+    if (!zenoh.publish(KEYEXPR, JSON.stringify(readings).c_str()))
     {
       syslog.error.println("Publish failed (node not running?)");
       if (!zenoh.isRunning())
