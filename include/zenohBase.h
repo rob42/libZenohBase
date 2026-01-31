@@ -12,7 +12,7 @@
 #include <LittleFS.h>
 
 // remote syslog server for logs
-#define RSYSLOG_IP "192.168.1.125"
+#define RSYSLOG_IP "cbr.local"
 
 //zenoh
 // Peer mode values (comment/uncomment as needed)
