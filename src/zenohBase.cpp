@@ -6,7 +6,7 @@ ZenohNode zenoh;
 WifiNode wifiNode;
 WebServerNode webServerNode;
 
-JSONVar baseReadings = new JSONVar();
+JSONVar readings = new JSONVar();
 unsigned long zenohLastTime = 0;
 unsigned long zenohTimerDelay = 1000;
 Preferences preferences;
