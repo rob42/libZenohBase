@@ -11,6 +11,10 @@ unsigned long zenohLastTime = 0;
 unsigned long zenohTimerDelay = 1000;
 Preferences preferences;
 
+const char* ntpServer = "pool.ntp.org";
+const long gmtOffset_sec = 60*60*12;    // (NZ) Adjust this for your timezone, in secs
+const int daylightOffset_sec = 3600; 
+
 #ifdef LIB_COMPILE_ONLY
 //we need this (in arduino) to be able to compile the lib standalone during lib dev.
 //not included when building a project using the lib.

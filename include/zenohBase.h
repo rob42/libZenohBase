@@ -35,9 +35,9 @@ extern unsigned long zenohLastTime;
 extern unsigned long zenohTimerDelay;
 
 // NTP server setup
-const char* ntpServer = "pool.ntp.org";
-const long gmtOffset_sec = -18000;    // Adjust this for your timezone, secs
-const int daylightOffset_sec = 3600;  // Adjust if DST is in effect, 0 = no, 3600 =1 hr
+extern const char* ntpServer;
+extern const long gmtOffset_sec;    // Adjust this for your timezone, in secs
+extern const int daylightOffset_sec;  // Adjust if DST is in effect, 0 = no, 3600 =1 hr
 
 
 // Initialize base subsystems: WiFi, OTA, WebServer, Zenoh, Syslog
