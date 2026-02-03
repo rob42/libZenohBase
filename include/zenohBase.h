@@ -11,6 +11,7 @@
 #include <Preferences.h>
 #include <LittleFS.h>
 #include <time.h>
+#include <ESP32Time.h>
 
 // remote syslog server for logs
 #define RSYSLOG_IP "cbr.local"
@@ -38,7 +39,7 @@ extern unsigned long zenohTimerDelay;
 extern const char* ntpServer;
 extern const long gmtOffset_sec;    // Adjust this for your timezone, in secs
 extern const int daylightOffset_sec;  // Adjust if DST is in effect, 0 = no, 3600 =1 hr
-
+extern ESP32Time rtc;
 
 // Initialize base subsystems: WiFi, OTA, WebServer, Zenoh, Syslog
 void baseInit();

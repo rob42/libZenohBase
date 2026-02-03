@@ -14,6 +14,7 @@ Preferences preferences;
 const char* ntpServer = "pool.ntp.org";
 const long gmtOffset_sec = 60*60*12;    // (NZ) Adjust this for your timezone, in secs
 const int daylightOffset_sec = 3600; 
+ESP32Time rtc(gmtOffset_sec);
 
 #ifdef LIB_COMPILE_ONLY
 //we need this (in arduino) to be able to compile the lib standalone during lib dev.
@@ -201,7 +202,13 @@ void baseInit()
 
   // Configure NTP
   configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
-  syslog.println("NTP time configured.");
+  struct tm timeinfo;
+  getLocalTime(&timeinfo);
+  //now update rtc
+  rtc.setTimeStruct(timeinfo);
+
+  syslog.print("NTP time configured: ");
+  syslog.println(rtc.getDateTime());
 
   webServerNode.init();
 
