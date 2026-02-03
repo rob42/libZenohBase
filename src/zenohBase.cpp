@@ -194,6 +194,11 @@ void baseInit()
   syslog.println(wifiNode.getIP());
 
   initOTA();
+
+  // Configure NTP
+  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+  syslog.println("NTP time configured.");
+
   webServerNode.init();
 
   initZenoh();
