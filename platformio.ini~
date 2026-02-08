@@ -1,3 +1,4 @@
+; filepath: /home/robert/arduinoWorkspace/n2kNodes/libZenohBase/platformio.ini
 ; PlatformIO Project Configuration File
 ;
 ;   Build options: build flags, source filter
@@ -8,7 +9,36 @@
 ; Please visit documentation for the other options and examples
 ; https://docs.platformio.org/page/projectconf.html
 
-[env:esp32-c3-devkitm-1]
+[platformio]
+name = libZenohBase
+
+[env:esp32c3_supermini]
 platform = espressif32
 board = esp32-c3-devkitm-1
+board_build.flash_mode = qio
+board_build.partitions = partitions.csv
+board_build.filesystem = littlefs
 framework = arduino
+lib_deps = 
+	https://github.com/rob42/NMEA2000
+	https://github.com/rob42/NMEA2000_esp32_twai
+	https://github.com/uldara1/Modbus
+	https://github.com/ESP32Async/AsyncTCP
+	https://github.com/ESP32Async/ESPAsyncWebServer
+	http://github.com/arduino-libraries/Arduino_JSON
+	https://github.com/rob42/zenoh-pico
+	mlesniew/PicoSyslog@^1.0.0 
+	https://github.com/fbiego/ESP32Time.git
+build_flags = 
+	-DARDUINO_USB_MODE=1
+	-DARDUINO_USB_CDC_ON_BOOT
+	-DZENOH_LOG_DEBUG
+	-DZ_CONFIG_SOCKET_TIMEOUT=2000
+	-DLIB_COMPILE_ONLY
+monitor_speed = 115200
+build_type = debug
+monitor_filters = esp32_exception_decoder
+monitor_dtr = 0
+monitor_rts = 0
+lib_ldf_mode = deep
+
