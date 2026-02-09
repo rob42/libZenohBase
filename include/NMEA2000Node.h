@@ -39,9 +39,23 @@ public:
         return id;
     }
 
+    void setReceiveMessages(const long unsigned int* receiveMessages){
+        NMEA2000.ExtendReceiveMessages(receiveMessages);
+        syslog.information.print("Extended Rx messages : ");
+        for(int i = 0; i < sizeof(receiveMessages)/sizeof(long); i++)
+            {
+            syslog.information.println(receiveMessages[i]);
+            }
+    }
+
+    void setReceiveMsgHandler(void (*_RcvMsgHandler)(const tN2kMsg &N2kMsg)){
+        NMEA2000.SetMsgHandler(_RcvMsgHandler);
+    }
+
+
     void setTransmitMessages(const long unsigned int* transmitMessages){
         NMEA2000.ExtendTransmitMessages(transmitMessages);
-        syslog.information.print("Extended messages : ");
+        syslog.information.print("Extended Tx messages : ");
         for(int i = 0; i < sizeof(transmitMessages)/sizeof(long); i++)
             {
             syslog.information.println(transmitMessages[i]);
@@ -58,7 +72,6 @@ public:
         syslog.information.print("NMEA2000 node address = ");
         syslog.information.println(nodeAddress, DEC);
         NMEA2000.SetMode(tNMEA2000::N2km_ListenAndNode, nodeAddress);
-        NMEA2000.EnableForward(true);
         syslog.information.println("Started OK");
         
     }
@@ -66,6 +79,9 @@ public:
     {
         NMEA2000.SetOnOpen(onOpenFunc);
     }
+     void setReceiveMsgHandler(handleNMEA2000Msg){
+     	 NMEA2000.SetMsgHandler(handleNMEA2000Msg);
+     }
     void open()
     {
         NMEA2000.Open();
