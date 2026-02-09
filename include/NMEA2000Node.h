@@ -39,7 +39,7 @@ public:
         return id;
     }
 
-    void setTransmitMessages(const unsigned long *transmitMessages){
+    void setTransmitMessages(const unsigned long transmitMessages){
         NMEA2000.ExtendTransmitMessages(transmitMessages);
         syslog.information.print("Extended messages : ");
         for(int i = 0; i < sizeof(transmitMessages)/sizeof(long); i++)
