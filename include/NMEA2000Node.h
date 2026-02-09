@@ -38,10 +38,19 @@ public:
             id += (chipid[i] << (7 * i));
         return id;
     }
+
+    void setTransmitMessages(const unsigned long *transmitMessages){
+        NMEA2000.ExtendTransmitMessages(transmitMessages);
+        syslog.information.print("Extended messages : ");
+        for(int i = 0; i < sizeof(transmitMessages)/sizeof(long); i++)
+            {
+            syslog.information.println(transmitMessages[i]);
+            }
+    }
     void init()
     {
         syslog.information.println("Starting NMEA2000 interface");
-        NMEA2000.SetProductInformation("00000002", 100, "Simple wind monitor", "1.2.0.24 (2022-10-01)", "1.2.0.0 (2022-10-01)");
+        NMEA2000.SetProductInformation("00000002", 100, "N2K Signalk zenoh converter", "1.2.0.24 (2022-10-01)", "1.2.0.0 (2022-10-01)");
         NMEA2000.SetDeviceInformation(getUniqueId(), 130, 85, 140);
         NMEA2000.SetForwardStream(&Serial);
         NMEA2000.SetForwardType(tNMEA2000::fwdt_Text);
@@ -51,13 +60,7 @@ public:
         NMEA2000.SetMode(tNMEA2000::N2km_ListenAndNode, nodeAddress);
         NMEA2000.EnableForward(true);
         syslog.information.println("Started OK");
-        static const unsigned long transmitMessages[] PROGMEM = {130306L, 0}; // Wind
-        NMEA2000.ExtendTransmitMessages(transmitMessages);
-        syslog.information.print("Extended messages : ");
-        for(int i = 0; i < sizeof(transmitMessages)/sizeof(long); i++)
-            {
-            syslog.information.println(transmitMessages[i]);
-            }
+        
     }
     void setOnOpen(void (*onOpenFunc)())
     {
