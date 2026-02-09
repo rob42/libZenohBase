@@ -79,9 +79,7 @@ public:
     {
         NMEA2000.SetOnOpen(onOpenFunc);
     }
-     void setReceiveMsgHandler(handleNMEA2000Msg){
-     	 NMEA2000.SetMsgHandler(handleNMEA2000Msg);
-     }
+     
     void open()
     {
         NMEA2000.Open();
