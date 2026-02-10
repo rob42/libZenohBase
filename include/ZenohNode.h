@@ -6,6 +6,7 @@
 #include <stddef.h>
 #include <zenoh-pico.h>
 #include <PicoSyslog.h>
+#include <Hashtable.h>
 
 // Peer mode values (comment/uncomment as needed)
 #define ZENOH_MODE "peer"
@@ -16,9 +17,6 @@
 //#define ZENOH_MODE "client"
 //#define ZENOH_LOCATOR "tcp/192.168.1.125:7447" 
 //#define ZENOH_LOCATOR "" // If empty, it will scout
-
-// zenoh key that is published.
-#define KEYEXPR "test/test"
 
 extern PicoSyslog::Logger syslog;
 typedef void (*ZenohMessageCallback)(const char* topic, const char* payload, size_t len);
@@ -33,7 +31,7 @@ public:
  // void setSyslogIP(const char* ip);
   // Initialize the Zenoh node. Optionally provide a locator/url. mode, and keyExpr
   // Returns true on success.
-  bool begin(const char* locator = nullptr,const char* mode = "client",const char* keyExpr = "test/test");
+  bool begin(const char* locator = nullptr,const char* mode = "client");
 
   // Stop the node and free resources.
   void end();

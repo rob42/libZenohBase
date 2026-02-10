@@ -6,7 +6,7 @@ ZenohNode zenoh;
 WifiNode wifiNode;
 WebServerNode webServerNode;
 
-JSONVar readings = new JSONVar();
+JsonDocument readings = JsonDocument();
 unsigned long zenohLastTime = 0;
 unsigned long zenohTimerDelay = 1000;
 Preferences preferences;
@@ -48,7 +48,7 @@ void onZenohMessage(const char *topic, const char *payload, size_t len)
 
 void initZenoh()
 {
-  if (!zenoh.begin(ZENOH_LOCATOR, ZENOH_MODE, KEYEXPR))
+  if (!zenoh.begin(ZENOH_LOCATOR, ZENOH_MODE))
   {
     syslog.error.println("Zenoh setup failed!");
     return;
@@ -69,12 +69,14 @@ void processZenoh()
 {
   if ((millis() - zenohLastTime) > zenohTimerDelay)
   {
-    if (!zenoh.publish(KEYEXPR, JSON.stringify(readings).c_str()))
-    {
-      syslog.error.println("Publish failed (node not running?)");
-      if (!zenoh.isRunning())
+    for(JsonPair kv : readings.as<JsonObject>()) {
+      if (!zenoh.publish(kv.key().c_str(), kv.value().as<const char*>()))
       {
-        initZenoh();
+        syslog.error.println("Publish failed (node not running?)");
+        if (!zenoh.isRunning())
+        {
+          initZenoh();
+        }
       }
     }
     zenohLastTime = millis();

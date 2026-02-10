@@ -4,7 +4,7 @@
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <LittleFS.h>
-#include <Arduino_JSON.h>
+#include <ArduinoJson.h>
 #include <functional>
 #include <WiFi.h>
 #include <PicoSyslog.h>
@@ -21,7 +21,7 @@ public:
     // Create an Event Source on /events
     AsyncEventSource events;
     // Json Variable to hold data (Sensor Readings)
-    JSONVar webReadings = JSONVar();
+    JsonDocument webReadings = JsonDocument();
 
     unsigned long webLastTime = 0;
     unsigned long webTimerDelay = 1000;
@@ -42,8 +42,10 @@ public:
                   { request->send(LittleFS, "/index.html", "text/html"); });
         server.serveStatic("/", LittleFS, "/");
         server.on("/readings", HTTP_GET, [this](AsyncWebServerRequest *request)
-                  {
-            String json = JSON.stringify(webReadings);
+            {
+            int n = measureJson(webReadings);
+            char json[n];
+            serializeJson(webReadings, json ,n);
             request->send(200, "application/json", json); });
         events.onConnect([](AsyncEventSourceClient *client)
                 {
@@ -60,7 +62,10 @@ public:
         if ((millis() - webLastTime) > webTimerDelay)
         {
             events.send("ping", NULL, millis());
-            events.send(JSON.stringify(webReadings).c_str(), "new_readings", millis());
+            int n = measureJson(webReadings);
+            char json[n];
+            serializeJson(webReadings, json ,n);
+            events.send(json, "new_readings", millis());
             webLastTime = millis();
         }
     }

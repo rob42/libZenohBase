@@ -1,9 +1,11 @@
 #include "ZenohNode.h"
 
 z_owned_session_t s;
-z_owned_publisher_t pub;
+//z_owned_publisher_t pub;
 z_owned_subscriber_t sub;
 ZenohMessageCallback callback;
+//need hashtable to hold key<>publisher map.
+Hashtable <String, z_owned_publisher_t> publishers;
 
 ZenohNode::ZenohNode()
   : running(false) //, callback(nullptr)
@@ -15,8 +17,7 @@ ZenohNode::~ZenohNode()
   end();
 }
 
-
-bool ZenohNode::begin(const char* locator, const char* mode, const char* keyExpr)
+bool ZenohNode::begin(const char* locator, const char* mode)
 {
   // Initialize Zenoh Session and other parameters
   syslog.information.print("Initialize Zenoh Session and other parameters...");
@@ -48,8 +49,6 @@ bool ZenohNode::begin(const char* locator, const char* mode, const char* keyExpr
         return false;
     }
     syslog.println("OK");
-    
-    declarePublisher(keyExpr);
    
     syslog.information.println("Zenoh setup finished!");
 
@@ -66,12 +65,19 @@ bool ZenohNode::declarePublisher(const char* keyExpr){
     syslog.information.print("Declaring publisher for ");
     syslog.information.print(keyExpr);
     syslog.information.println("...");
+    if(publishers.containsKey(keyExpr)){
+      //we already have it
+      syslog.information.println("Already declared");
+      return false;
+    }
+    z_owned_publisher_t pub;
     z_view_keyexpr_t ke;
     z_view_keyexpr_from_str_unchecked(&ke, keyExpr);
     if (z_declare_publisher(z_session_loan(&s), &pub, z_view_keyexpr_loan(&ke), NULL) < 0) {
         syslog.error.println("Unable to declare publisher for key expression!");
         return false;
     }
+    publishers.put(keyExpr, pub);
     syslog.information.println("OK");
     return true;
 }
@@ -105,7 +111,7 @@ bool ZenohNode::publish(const char* topic, const char* payloadStr, size_t len)
   z_owned_bytes_t payload;
   z_bytes_copy_from_str(&payload, payloadStr);
 
-  if (z_publisher_put(z_publisher_loan(&pub), z_bytes_move(&payload), NULL) < 0) {
+  if (z_publisher_put(z_publisher_loan(publishers.get(topic)), z_bytes_move(&payload), NULL) < 0) {
       syslog.error.println("Error while publishing data");
       return false;
   }
@@ -130,7 +136,6 @@ void ZenohNode::data_handler(z_loaned_sample_t *sample, void *arg) {
     syslog.debug.print(z_string_data(z_string_loan(&value)));
     syslog.debug.println(")");
     
-   
     callback(z_string_data(z_view_string_loan(&keystr)),  
           z_string_data(z_string_loan(&value)),
           z_string_len(z_string_loan(&value)));

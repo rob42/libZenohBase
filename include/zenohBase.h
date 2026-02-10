@@ -2,7 +2,7 @@
 #define ZENOH_BASE_H
 
 #include <Arduino.h>
-#include <Arduino_JSON.h>
+#include <ArduinoJson.h>
 #include <ArduinoOTA.h>
 #include <ZenohNode.h>
 #include <WifiNode.h>
@@ -29,7 +29,7 @@ extern PicoSyslog::Logger syslog;
 extern ZenohNode zenoh;
 extern WifiNode wifiNode;
 extern WebServerNode webServerNode;
-extern JSONVar readings;
+extern JsonDocument readings;
 
 // zenoh publish timing (ms)
 extern unsigned long zenohLastTime;
