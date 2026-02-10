@@ -7,6 +7,7 @@
 #include <zenoh-pico.h>
 #include <PicoSyslog.h>
 #include <Hashtable.h>
+#include <signalk.h>
 
 // Peer mode values (comment/uncomment as needed)
 #define ZENOH_MODE "peer"

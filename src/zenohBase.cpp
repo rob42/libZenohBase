@@ -54,7 +54,7 @@ void initZenoh()
     return;
   }
   // Subscribe to a topic
-  if (zenoh.subscribe("navigation/courseOverGround", onZenohMessage) && zenoh.subscribe("navigation/speedOverGround", onZenohMessage))
+  if (zenoh.subscribe(KEY_NAVIGATION_COURSEOVERGROUNDTRUE, onZenohMessage) && zenoh.subscribe(KEY_NAVIGATION_SPEEDOVERGROUND, onZenohMessage))
   {
     syslog.information.println("Subscribed to navigation/courseOverGround");
     syslog.information.println("Subscribed to navigation/speedOverGround");

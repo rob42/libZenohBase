@@ -12,6 +12,7 @@
 #include <LittleFS.h>
 #include <time.h>
 #include <ESP32Time.h>
+#include <signalk.h>
 
 // remote syslog server for logs
 #define RSYSLOG_IP "cbr.local"
