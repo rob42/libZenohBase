@@ -37,12 +37,33 @@ public:
   // Stop the node and free resources.
   void end();
 
+  //true is session is alive
+  bool checkSession();
+
   // Publish a raw payload to a topic.
+  bool publishZbytes(const char* topic, z_owned_bytes_t *payload);
+
+  // Publish a string payload to a topic.
   // Returns true on success.
   bool publish(const char* topic, const char* payload, size_t len);
 
   // Convenience overload for null-terminated payloads (strings).
   bool publish(const char* topic, const char* payload);
+
+  // Convenience overload for null-terminated payloads (double).
+  bool publish(const char* topic, double payload);
+
+  // Convenience overload for null-terminated payloads (float).
+  bool publish(const char* topic, float payload);
+
+  // Convenience overload for null-terminated payloads (int).
+  bool publish(const char* topic, int payload);
+
+  // Convenience overload for null-terminated payloads (long).
+  bool publish(const char* topic, long payload);
+
+  // Convenience overload for null-terminated payloads (bool).
+  bool publish(const char* topic, bool payload);
 
   // Subscribe to a topic; callback will be invoked for received messages.
   // Returns true on success.

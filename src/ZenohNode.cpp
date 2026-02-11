@@ -92,31 +92,84 @@ void ZenohNode::end()
   running = false;
 }
 
-bool ZenohNode::publish(const char* topic, const char* payloadStr, size_t len)
-{
-
-  if (z_session_is_closed(z_session_loan(&s))) {
+bool ZenohNode::checkSession(){
+   if (z_session_is_closed(z_session_loan(&s))) {
     syslog.error.println("Error: Zenoh is not running");
     return false;
   }
-  // Replace with actual publish logic.
-  syslog.debug.print("ZenohNode: publish to ");
-  syslog.debug.print(topic);
-  syslog.debug.print( " : " );
-  syslog.debug.print(payloadStr);
-  syslog.debug.print(" (");
-  syslog.debug.print(len);
-  syslog.debug.println(" bytes)");
+  return true;
+}
 
-  z_owned_bytes_t payload;
-  z_bytes_copy_from_str(&payload, payloadStr);
 
-  if (z_publisher_put(z_publisher_loan(publishers.get(topic)), z_bytes_move(&payload), NULL) < 0) {
+bool ZenohNode::publishZbytes(const char* topic, z_owned_bytes_t *payload){
+
+  if (z_publisher_put(z_publisher_loan(publishers.get(topic)), z_bytes_move(payload), NULL) < 0) {
       syslog.error.println("Error while publishing data");
       return false;
   }
   // Assume publish succeeds.
   return true;
+}
+
+bool ZenohNode::publish(const char* topic, const char* payloadStr, size_t len)
+{
+  if(!checkSession())return false;
+ 
+  syslog.debug.printf("ZenohNode: publish to %s : %s (%d) bytes", topic,payloadStr,len);
+  z_owned_bytes_t payload;
+  z_bytes_copy_from_str(&payload, payloadStr);
+  return publishZbytes(topic,&payload);
+}
+
+// Convenience overload for null-terminated payloads (double).
+bool ZenohNode::publish(const char* topic, double pLoad)
+{
+  if(!checkSession())return false;
+ 
+  syslog.debug.printf("ZenohNode: publish to %s : %d ", topic,pLoad);
+  z_owned_bytes_t payload;
+  ze_serialize_double(&payload, pLoad);
+  return publishZbytes(topic,&payload);
+}
+
+// Convenience overload for null-terminated payloads (float).
+bool ZenohNode::publish(const char* topic, float pLoad){
+  if(!checkSession())return false;
+ 
+  syslog.debug.printf("ZenohNode: publish to %s : %d ", topic,pLoad);
+  z_owned_bytes_t payload;
+  ze_serialize_float(&payload, pLoad);
+  return publishZbytes(topic,&payload);
+}
+
+// Convenience overload for null-terminated payloads (int).
+bool ZenohNode::publish(const char* topic, int pLoad){
+  if(!checkSession())return false;
+ 
+  syslog.debug.printf("ZenohNode: publish to %s : %d ", topic,pLoad);
+  z_owned_bytes_t payload;
+  ze_serialize_int32(&payload, pLoad);
+  return publishZbytes(topic,&payload);
+}
+
+// Convenience overload for null-terminated payloads (long).
+bool ZenohNode::publish(const char* topic, long pLoad){
+  if(!checkSession())return false;
+ 
+  syslog.debug.printf("ZenohNode: publish to %s : %d ", topic,pLoad);
+  z_owned_bytes_t payload;
+  ze_serialize_int32(&payload, pLoad);
+  return publishZbytes(topic,&payload);
+}
+
+// Convenience overload for null-terminated payloads (long).
+bool ZenohNode::publish(const char* topic, bool pLoad){
+  if(!checkSession())return false;
+ 
+  syslog.debug.printf("ZenohNode: publish to %s : %d ", topic,pLoad);
+  z_owned_bytes_t payload;
+  ze_serialize_bool(&payload, pLoad);
+  return publishZbytes(topic,&payload);
 }
 
 bool ZenohNode::publish(const char* topic, const char* payload)
@@ -130,11 +183,7 @@ void ZenohNode::data_handler(z_loaned_sample_t *sample, void *arg) {
     z_owned_string_t value;
     z_bytes_to_string(z_sample_payload(sample), &value);
 
-    syslog.debug.print(" >> [Subscription listener] Received (");
-    syslog.debug.print(z_string_data(z_view_string_loan(&keystr)));
-    syslog.debug.print(", ");
-    syslog.debug.print(z_string_data(z_string_loan(&value)));
-    syslog.debug.println(")");
+    syslog.debug.printf(" >> [Subscription listener] Received ( %s, %s )", &keystr, &value);
     
     callback(z_string_data(z_view_string_loan(&keystr)),  
           z_string_data(z_string_loan(&value)),
