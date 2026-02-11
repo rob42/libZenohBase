@@ -65,12 +65,39 @@ void initZenoh()
   }
 }
 
+bool publishZenoh(JsonPair kv){
+  
+  if(kv.value().is<double>()){
+      return zenoh.publish(kv.key().c_str(), kv.value().as<double>());
+  }
+  if(kv.value().is<float>()){
+      return zenoh.publish(kv.key().c_str(), kv.value().as<float>());
+  }
+  if(kv.value().is<int>()){
+      return zenoh.publish(kv.key().c_str(), kv.value().as<int>());
+  }
+  if(kv.value().is<long>()){
+      return zenoh.publish(kv.key().c_str(), kv.value().as<long>());
+  }
+  if(kv.value().is<bool>()){
+      return zenoh.publish(kv.key().c_str(), kv.value().as<bool>());
+  }
+  if(kv.value().is<const char*>()){
+      return zenoh.publish(kv.key().c_str(), kv.value().as<const char*>());
+  }
+  if(kv.value().is<const char*>()){
+      return zenoh.publish(kv.key().c_str(), kv.value().as<const char*>());
+  }
+  syslog.error.printf("Publish failed for key: %s = %s\n", kv.key().c_str(), kv.value().as<const char*>());
+  return false;
+}
 void processZenoh()
 {
   if ((millis() - zenohLastTime) > zenohTimerDelay)
   {
     for(JsonPair kv : readings.as<JsonObject>()) {
-      if (!zenoh.publish(kv.key().c_str(), kv.value().as<const char*>()))
+      
+      if (!publishZenoh(kv))
       {
         syslog.error.println("Publish failed (node not running?)");
         if (!zenoh.isRunning())
