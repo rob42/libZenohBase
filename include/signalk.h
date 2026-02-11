@@ -30,15 +30,15 @@
 #define KEY_STEERING_RUDDERANGLE  "steering/rudderAngle"       
 
 //watermaker
-#define KEY_WATERMAKER_MAIN_BOOSTPUMP_TEMPERATURE
-#define KEY_WATERMAKER_MAIN_HIGHPRESSUREPUMP_TEMPERATURE
-#define KEY_WATERMAKER_MAIN_PREFILTERPRESSURE
-#define KEY_WATERMAKER_MAIN_POSTFILTERPRESSURE
-#define KEY_WATERMAKER_MAIN_PREMEMBRANEPRESSURE
-#define KEY_WATERMAKER_MAIN_POSTMEMBRANEPRESSURE
-#define KEY_WATERMAKER_MAIN_PRODUCTSALINITY
-#define KEY_WATERMAKER_MAIN_STARTTIME
-#define KEY_WATERMAKER_MAIN_STOPTIME
-#define KEY_WATERMAKER_MAIN_STATUS
-#define KEY_WATERMAKER_MAIN_RUNTIME                                      
+#define KEY_WATERMAKER_MAIN_BOOSTPUMP_TEMPERATURE "watermaker/main/boostPump/temperature"
+#define KEY_WATERMAKER_MAIN_HIGHPRESSUREPUMP_TEMPERATURE "watermaker/main/highPressurePump/temperature"
+#define KEY_WATERMAKER_MAIN_PREFILTERPRESSURE "watermaker/main/preFilterPressure"
+#define KEY_WATERMAKER_MAIN_POSTFILTERPRESSURE "watermaker/main/postFilterPressure"
+#define KEY_WATERMAKER_MAIN_PREMEMBRANEPRESSURE "watermaker/main/preMembranePressure"
+#define KEY_WATERMAKER_MAIN_POSTMEMBRANEPRESSURE "watermaker/main/postMembranePressure"
+#define KEY_WATERMAKER_MAIN_PRODUCTSALINITY "watermaker/main/productSalinity"
+#define KEY_WATERMAKER_MAIN_STARTTIME "watermaker/main/startTime"
+#define KEY_WATERMAKER_MAIN_STOPTIME "watermaker/main/stopTime"
+#define KEY_WATERMAKER_MAIN_STATUS "watermaker/main/status"
+#define KEY_WATERMAKER_MAIN_RUNTIME "watermaker/main/runTime" 
 #endif
