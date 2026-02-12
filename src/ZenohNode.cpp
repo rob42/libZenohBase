@@ -2,8 +2,10 @@
 
 z_owned_session_t s;
 //z_owned_publisher_t pub;
-z_owned_subscriber_t sub;
-ZenohMessageCallback callback;
+//z_owned_subscriber_t sub;
+Hashtable <String, z_owned_subscriber_t> subscribers;
+//ZenohMessageCallback callback;
+Hashtable <String, ZenohMessageCallback> subscriberCallback;
 //need hashtable to hold key<>publisher map.
 Hashtable <String, z_owned_publisher_t> publishers;
 
@@ -86,9 +88,18 @@ bool ZenohNode::declarePublisher(const char* keyExpr){
 void ZenohNode::end()
 {
   if (!running) return;
-
   // Placeholder cleanup logic.
   syslog.information.println("ZenohNode: shutting down");
+  for(z_owned_publisher_t p : publishers.values()){
+    z_undeclare_publisher(z_publisher_move(&p));
+  }
+  for(z_owned_subscriber_t s : subscribers.values()){
+    z_undeclare_subscriber(z_subscriber_move(&s));
+  }
+  publishers.clear();
+  subscribers.clear();
+  subscriberCallback.clear();
+  
   running = false;
 }
 
@@ -185,7 +196,16 @@ void ZenohNode::data_handler(z_loaned_sample_t *sample, void *arg) {
 
     syslog.debug.printf(" >> [Subscription listener] Received ( %s, %s )", &keystr, &value);
     
-    callback(z_string_data(z_view_string_loan(&keystr)),  
+    
+    //broken...
+    const char* key = z_string_data(z_view_string_loan(&keystr));
+    
+    ZenohMessageCallback* callback =  subscriberCallback.get(key);
+    if(callback == nullptr){
+      syslog.debug.printf(" >> [Subscription listener] no callback for %s\n",key);
+      return;
+    }
+    (*callback)(key,  
           z_string_data(z_string_loan(&value)),
           z_string_len(z_string_loan(&value)));
 
@@ -196,23 +216,34 @@ bool ZenohNode::subscribe(const char* topic, ZenohMessageCallback cb)
 {
 
   if (!running) return false;
-  // Store callback 
-    callback = cb;
-
+    z_view_keyexpr_t ke;
+    z_view_keyexpr_from_str_unchecked(&ke, topic);
+  if(subscribers.containsKey(topic)){
+      //we already have it
+      syslog.information.println("Already declared");
+      return false;
+    }
+  
     // Declare Zenoh subscriber
-    syslog.information.print("Declaring Subscriber on ");
-    syslog.information.print(topic);
-    syslog.information.println(" ...");
+    syslog.information.printf("Declaring Subscriber on %s\n",topic);
+
+    z_owned_subscriber_t sub;
+
     z_owned_closure_sample_t sample;
     
     z_closure_sample(&sample, data_handler, NULL, NULL);
-    z_view_keyexpr_t ke;
-    z_view_keyexpr_from_str_unchecked(&ke, topic);
+    
     if (z_declare_subscriber(z_session_loan(&s), &sub, z_view_keyexpr_loan(&ke), z_closure_sample_move(&sample),
                              NULL) < 0) {
         syslog.error.println("Unable to declare subscriber.");
         return false;
     }
+    //store subscriber
+    subscribers.put(topic, sub);
+
+    // Store callback 
+    subscriberCallback.put(topic, cb);
+
     syslog.information.println("OK");
   return true;
 }
