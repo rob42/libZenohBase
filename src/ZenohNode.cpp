@@ -99,7 +99,7 @@ void ZenohNode::end()
   publishers.clear();
   subscribers.clear();
   subscriberCallback.clear();
-  
+
   running = false;
 }
 
@@ -112,24 +112,23 @@ bool ZenohNode::checkSession(){
 }
 
 
-bool ZenohNode::publishZbytes(const char* topic, z_owned_bytes_t *payload){
-
-  if (z_publisher_put(z_publisher_loan(publishers.get(topic)), z_bytes_move(payload), NULL) < 0) {
-      syslog.error.println("Error while publishing data");
+bool ZenohNode::publishZbytes(const char* topic, const char* payloadStr){
+  z_owned_bytes_t payload;
+  z_bytes_copy_from_str(&payload, payloadStr);
+  if (z_publisher_put(z_publisher_loan(publishers.get(topic)), z_bytes_move(&payload), NULL) < 0) {
+      syslog.error.printf("Error while publishing data: %s\n", topic);
       return false;
   }
   // Assume publish succeeds.
   return true;
 }
 
-bool ZenohNode::publish(const char* topic, const char* payloadStr, size_t len)
+bool ZenohNode::publish(const char* topic, const char* pLoad)
 {
   if(!checkSession())return false;
  
-  syslog.debug.printf("ZenohNode: publish to %s : %s (%d) bytes", topic,payloadStr,len);
-  z_owned_bytes_t payload;
-  z_bytes_copy_from_str(&payload, payloadStr);
-  return publishZbytes(topic,&payload);
+  syslog.debug.printf("ZenohNode: publish to %s : %s", topic,pLoad);
+  return publishZbytes(topic,pLoad);
 }
 
 // Convenience overload for null-terminated payloads (double).
@@ -138,9 +137,8 @@ bool ZenohNode::publish(const char* topic, double pLoad)
   if(!checkSession())return false;
  
   syslog.debug.printf("ZenohNode: publish to %s : %d ", topic,pLoad);
-  z_owned_bytes_t payload;
-  ze_serialize_double(&payload, pLoad);
-  return publishZbytes(topic,&payload);
+
+  return publishZbytes(topic,String(pLoad).c_str());
 }
 
 // Convenience overload for null-terminated payloads (float).
@@ -148,9 +146,7 @@ bool ZenohNode::publish(const char* topic, float pLoad){
   if(!checkSession())return false;
  
   syslog.debug.printf("ZenohNode: publish to %s : %d ", topic,pLoad);
-  z_owned_bytes_t payload;
-  ze_serialize_float(&payload, pLoad);
-  return publishZbytes(topic,&payload);
+  return publishZbytes(topic,String(pLoad).c_str());
 }
 
 // Convenience overload for null-terminated payloads (int).
@@ -158,9 +154,8 @@ bool ZenohNode::publish(const char* topic, int pLoad){
   if(!checkSession())return false;
  
   syslog.debug.printf("ZenohNode: publish to %s : %d ", topic,pLoad);
-  z_owned_bytes_t payload;
-  ze_serialize_int32(&payload, pLoad);
-  return publishZbytes(topic,&payload);
+
+  return publishZbytes(topic,String(pLoad).c_str());
 }
 
 // Convenience overload for null-terminated payloads (long).
@@ -168,9 +163,7 @@ bool ZenohNode::publish(const char* topic, long pLoad){
   if(!checkSession())return false;
  
   syslog.debug.printf("ZenohNode: publish to %s : %d ", topic,pLoad);
-  z_owned_bytes_t payload;
-  ze_serialize_int32(&payload, pLoad);
-  return publishZbytes(topic,&payload);
+  return publishZbytes(topic,String(pLoad).c_str());
 }
 
 // Convenience overload for null-terminated payloads (long).
@@ -178,26 +171,31 @@ bool ZenohNode::publish(const char* topic, bool pLoad){
   if(!checkSession())return false;
  
   syslog.debug.printf("ZenohNode: publish to %s : %d ", topic,pLoad);
-  z_owned_bytes_t payload;
-  ze_serialize_bool(&payload, pLoad);
-  return publishZbytes(topic,&payload);
+  return publishZbytes(topic,String(pLoad).c_str());
 }
 
-bool ZenohNode::publish(const char* topic, const char* payload)
-{
-  return publish(topic, (const char*)payload, strlen(payload));
-}
+/*
+  Always calls the callback with the char* of the payload. 
+  
+  The published value will be valid as the signalk type:
+    values (primitives) will be simple text
+    complex types will be json
 
+  eg If the payload was 'navigation.position.latitude, holding a float
+  then the callback should know the correct type and deal with that. 
+
+  If the payload was 'navigation/position' then it will be json
+
+*/
 void ZenohNode::data_handler(z_loaned_sample_t *sample, void *arg) {
     z_view_string_t keystr;
     z_keyexpr_as_view_string(z_sample_keyexpr(sample), &keystr);
+
     z_owned_string_t value;
     z_bytes_to_string(z_sample_payload(sample), &value);
 
     syslog.debug.printf(" >> [Subscription listener] Received ( %s, %s )", &keystr, &value);
-    
-    
-    //broken...
+  
     const char* key = z_string_data(z_view_string_loan(&keystr));
     
     ZenohMessageCallback* callback =  subscriberCallback.get(key);
