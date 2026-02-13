@@ -106,17 +106,23 @@ public:
         if (seq == 255)
             seq = 1;
     }
-    void sendWind( double windAngle, double windSpeed, bool debug)
+    void sendWindApparent( double windAngle, double windSpeed, bool debug)
     {
         tN2kMsg N2kMsg;
         SetN2kWindSpeed(N2kMsg, seq, windSpeed, windAngle, N2kWind_Apparent);
         if (NMEA2000.SendMsg(N2kMsg))
         {
-        
-                syslog.debug.print("Bus ID: ");
-                syslog.debug.print(NMEA2000.GetN2kSource());
-                syslog.debug.println(" sent n2k message");
-            
+                syslog.debug.printf("Bus ID: %c sent n2k message",NMEA2000.GetN2kSource());
+        }
+        incrementSeq();
+    }
+    void sendWindTrue( double windAngle, double windSpeed, bool debug)
+    {
+        tN2kMsg N2kMsg;
+        SetN2kWindSpeed(N2kMsg, seq, windSpeed, windAngle, N2kWind_True_boat);
+        if (NMEA2000.SendMsg(N2kMsg))
+        {
+        syslog.debug.printf("Bus ID: %c sent n2k message",NMEA2000.GetN2kSource());
         }
         incrementSeq();
     }
