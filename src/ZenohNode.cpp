@@ -127,7 +127,7 @@ bool ZenohNode::publish(const char* topic, const char* pLoad)
 {
   if(!checkSession())return false;
  
-  syslog.debug.printf("ZenohNode: publish to %s : %s", topic,pLoad);
+  syslog.debug.printf("ZenohNode: publish to %s : %s\n", topic,pLoad);
   return publishZbytes(topic,pLoad);
 }
 
@@ -136,7 +136,7 @@ bool ZenohNode::publish(const char* topic, double pLoad)
 {
   if(!checkSession())return false;
  
-  syslog.debug.printf("ZenohNode: publish to %s : %d ", topic,pLoad);
+  syslog.debug.printf("ZenohNode: publish to %s : %d \n", topic,pLoad);
 
   return publishZbytes(topic,String(pLoad).c_str());
 }
@@ -145,7 +145,7 @@ bool ZenohNode::publish(const char* topic, double pLoad)
 bool ZenohNode::publish(const char* topic, float pLoad){
   if(!checkSession())return false;
  
-  syslog.debug.printf("ZenohNode: publish to %s : %d ", topic,pLoad);
+  syslog.debug.printf("ZenohNode: publish to %s : %d \n", topic,pLoad);
   return publishZbytes(topic,String(pLoad).c_str());
 }
 
@@ -153,7 +153,7 @@ bool ZenohNode::publish(const char* topic, float pLoad){
 bool ZenohNode::publish(const char* topic, int pLoad){
   if(!checkSession())return false;
  
-  syslog.debug.printf("ZenohNode: publish to %s : %d ", topic,pLoad);
+  syslog.debug.printf("ZenohNode: publish to %s : %d \n", topic,pLoad);
 
   return publishZbytes(topic,String(pLoad).c_str());
 }
@@ -162,7 +162,7 @@ bool ZenohNode::publish(const char* topic, int pLoad){
 bool ZenohNode::publish(const char* topic, long pLoad){
   if(!checkSession())return false;
  
-  syslog.debug.printf("ZenohNode: publish to %s : %d ", topic,pLoad);
+  syslog.debug.printf("ZenohNode: publish to %s : %d \n", topic,pLoad);
   return publishZbytes(topic,String(pLoad).c_str());
 }
 
@@ -170,7 +170,7 @@ bool ZenohNode::publish(const char* topic, long pLoad){
 bool ZenohNode::publish(const char* topic, bool pLoad){
   if(!checkSession())return false;
  
-  syslog.debug.printf("ZenohNode: publish to %s : %d ", topic,pLoad);
+  syslog.debug.printf("ZenohNode: publish to %s : %d \n", topic,pLoad);
   return publishZbytes(topic,String(pLoad).c_str());
 }
 
@@ -194,7 +194,7 @@ void ZenohNode::data_handler(z_loaned_sample_t *sample, void *arg) {
     z_owned_string_t value;
     z_bytes_to_string(z_sample_payload(sample), &value);
 
-    syslog.debug.printf(" >> [Subscription listener] Received ( %s, %s )", &keystr, &value);
+    syslog.debug.printf(" >> [Subscription listener] Received ( %s, %s )\n", &keystr, &value);
   
     const char* key = z_string_data(z_view_string_loan(&keystr));
     
