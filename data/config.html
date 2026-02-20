@@ -1,18 +1,26 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Wi-Fi Config</title>
-  <style>/* Add CSS for responsive design */</style>
-</head>
+  <head>
+    <title>Wi-Fi Config</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" type="text/css" href="config.css">
+  </head>
 <body>
-  <form action="/connect" method="POST">
-    <input type="text" name="ssid" placeholder="SSID" required>
-    <input type="password" name="password" placeholder="Password" required>
-    <button type="submit">Connect</button>
+
+<div class="login">
+  <h1>Wi-Fi Config</h1>
+  <form method="post" action="/connect">
+    <p><input type="text" name="ssid" value="" placeholder="SSID"></p>
+    <p><input type="password" name="password" value="" placeholder="Password"></p>
+    <p class="submit"><input type="submit" name="commit" value="Connect"></p>
   </form>
+</div>
+
+<div class="login-help">
   <div id="status"></div>
-  <script>
-    // Handle form submission feedback
-  </script>
+</div>
+
+
 </body>
 </html>
