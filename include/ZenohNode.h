@@ -41,7 +41,7 @@ public:
   bool checkSession();
 
   // Publish a raw payload to a topic.
-  bool publishZbytes(const char* topic, z_owned_bytes_t *payload);
+  bool publishZbytes(const char* topic, const char* payloadStr);
 
   // Publish a string payload to a topic.
   // Returns true on success.

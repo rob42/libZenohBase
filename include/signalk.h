@@ -20,6 +20,7 @@
 #define KEY_NAVIGATION_GNSS_SATELLITES  "navigation/gnss/satellites"
 #define KEY_NAVIGATION_GNSS_TYPE  "navigation/gnss/type"
 #define KEY_NAVIGATION_HEADINGTRUE  "navigation/headingTrue"
+#define KEY_NAVIGATION_HEADINGMAGNETIC "navigation/headingMagnetic"
 #define KEY_NAVIGATION_LOG  "navigation/log"
 #define KEY_NAVIGATION_POSITION_ALTITUDE  "navigation/position/altitude"
 #define KEY_NAVIGATION_POSITION_LATITUDE  "navigation/position/latitude"
@@ -27,6 +28,9 @@
 #define KEY_NAVIGATION_SPEEDOVERGROUND  "navigation/speedOverGround"
 #define KEY_NAVIGATION_SPEEDTHROUGHWATER  "navigation/speedThroughWater"
 #define KEY_NAVIGATION_TRIP_LOG  "navigation/trip/log"
+
+#define KEY_NAVIGATION_MAGNETICDEVIATION "navigation/magneticDeviation"
+
 #define KEY_STEERING_RUDDERANGLE  "steering/rudderAngle"       
 
 //watermaker
