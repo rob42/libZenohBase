@@ -45,7 +45,7 @@ public:
             {
             int n = measureJson(webReadings);
             char json[n];
-            serializeJson(webReadings, json ,n);
+            serializeJson(webReadings, json ,n+1);
             request->send(200, "application/json", json); });
         events.onConnect([](AsyncEventSourceClient *client)
                 {
@@ -64,15 +64,45 @@ public:
             events.send("ping", NULL, millis());
             int n = measureJson(webReadings);
             char json[n];
-            serializeJson(webReadings, json ,n);
+            serializeJson(webReadings, json ,n+1);
             events.send(json, "new_readings", millis());
+            syslog.debug.println(json);
             webLastTime = millis();
         }
     }
 
-    void setSensorData(const char* key, double value){
-        webReadings[key] = value; // String(bme.readTemperature());
+    void setSensorData(char *key, double value){
+        int s = strlen(key);
+        char str[s+1];
+        strcpy(str,key);
+        char *ref = &str[0];
+        char *tok;
+        char *prevTok;
+       
+        //syslog.debug.printf("Key: %s, size: %d \n",str, s+1);
+        JsonObject tmp = webReadings.as<JsonObject>();
+        JsonObject prev; 
+        tok = strtok_r(ref, ".",&ref);
+         while (tok != NULL){
+            //first one
+            //syslog.debug.println(tok);
+            prevTok = tok;
+           // if(!tmp.isNull()) {
+                prev = tmp;
+                if(tmp[tok].is<JsonObject>()){
+                    tmp = tmp[tok];
+                }else{
+                    tmp = tmp[tok].to<JsonObject>();
+                }
+                
+           // }
+            tok = strtok_r(NULL, ".",&ref);
+        }
+        //tmp should now be the leaf
+        prev[prevTok] = value;
+        //syslog.debug.printf("done: %s = %d\n", prevTok, value);
     }
+
 
 };
 #endif
