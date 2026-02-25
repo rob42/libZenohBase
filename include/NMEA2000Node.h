@@ -39,10 +39,10 @@ public:
         return id;
     }
 
-    void setReceiveMessages(const long unsigned int* receiveMessages){
+    void setReceiveMessages(const unsigned long *receiveMessages){
         NMEA2000.ExtendReceiveMessages(receiveMessages);
-        syslog.information.print("Extended Rx messages : ");
-        for(int i = 0; i < sizeof(receiveMessages)/sizeof(long); i++)
+        syslog.information.println("Extended Rx messages : ");
+        for(int i = 0; i < sizeof(receiveMessages)/sizeof(receiveMessages[0]); i++)
             {
             syslog.information.println(receiveMessages[i]);
             }
@@ -55,8 +55,8 @@ public:
 
     void setTransmitMessages(const long unsigned int* transmitMessages){
         NMEA2000.ExtendTransmitMessages(transmitMessages);
-        syslog.information.print("Extended Tx messages : ");
-        for(int i = 0; i < sizeof(transmitMessages)/sizeof(long); i++)
+        syslog.information.println("Extended Tx messages : ");
+        for(int i = 0; i < sizeof(transmitMessages)/sizeof(transmitMessages[0]); i++)
             {
             syslog.information.println(transmitMessages[i]);
             }
