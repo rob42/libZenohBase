@@ -64,20 +64,35 @@ bool ZenohNode::begin(const char* locator, const char* mode)
 
 volatile unsigned int hellos = 0;
 void hello_handler(z_loaned_hello_t *hello, void *arg) {
+    syslog.debug.println("hello handler");
     (void)hello;
     (void)(arg);
-    printf("%s\n", __func__);
     const z_loaned_string_array_t *locators = zp_hello_locators(hello);
-    syslog.debug.printf("Found : %s\n",locators[0]),
+    //array of strings
+    //  tcp/[fe80::5eb2:37ec:94d7:5860]:42863
+    //  tcp/10.1.1.40:42863
+
+    // Process each locator  
+    size_t len = z_string_array_len(locators);  
+    for (size_t i = 0; i < len; i++) {  
+        const z_loaned_string_t *locator_str = z_string_array_get(locators, i);  
+        printf("Locator: %.*s\n", (int)z_string_len(locator_str), z_string_data(locator_str));  
+        MDNS.
+    }  
+    //syslog.debug.printf("Found : %s\n",locators[0]),
     hellos++;
 }
 
-bool getPeers(JsonArray peers){
-  z_owned_config_t *_ret_sconfig;
-    //z_config_default(&_ret_sconfig);
+bool ZenohNode::getZenohPeers(JsonArray peers){
+  syslog.debug.println("getZenohPeers");
+  hellos=0;
+  z_owned_config_t _ret_sconfig;
+  z_config_default(&_ret_sconfig);
   z_owned_closure_hello_t _ret_closure_hello;
-    z_closure_hello(&_ret_closure_hello, hello_handler, NULL, NULL);
-    z_result_t _ret_res = z_scout(z_config_move(_ret_sconfig), z_closure_hello_move(&_ret_closure_hello), NULL);
+  z_closure_hello(&_ret_closure_hello, hello_handler, NULL, NULL);
+  syslog.debug.println("execute scouting in getZenohPeers");
+  z_scout(z_config_move(&_ret_sconfig), z_closure_hello_move(&_ret_closure_hello), NULL);
+  syslog.debug.printf("Found %d peers\n", hellos);
   return true;
 }
 

@@ -41,7 +41,7 @@ public:
   //true is session is alive
   bool checkSession();
 
-  bool getPeers(JsonArray peers);
+  bool getZenohPeers(JsonArray peers);
 
   // Publish a raw payload to a topic.
   bool publishZbytes(const char* topic, const char* payloadStr);
