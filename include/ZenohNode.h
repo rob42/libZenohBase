@@ -8,6 +8,7 @@
 #include <PicoSyslog.h>
 #include <Hashtable.h>
 #include <signalk.h>
+#include <ArduinoJson.h>
 
 // Peer mode values (comment/uncomment as needed)
 #define ZENOH_MODE "peer"
@@ -39,6 +40,8 @@ public:
 
   //true is session is alive
   bool checkSession();
+
+  bool getPeers(JsonArray peers);
 
   // Publish a raw payload to a topic.
   bool publishZbytes(const char* topic, const char* payloadStr);

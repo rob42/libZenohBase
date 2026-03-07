@@ -62,6 +62,25 @@ bool ZenohNode::begin(const char* locator, const char* mode)
   return true;
 }
 
+volatile unsigned int hellos = 0;
+void hello_handler(z_loaned_hello_t *hello, void *arg) {
+    (void)hello;
+    (void)(arg);
+    printf("%s\n", __func__);
+    const z_loaned_string_array_t *locators = zp_hello_locators(hello);
+    syslog.debug.printf("Found : %s\n",locators[0]),
+    hellos++;
+}
+
+bool getPeers(JsonArray peers){
+  z_owned_config_t *_ret_sconfig;
+    //z_config_default(&_ret_sconfig);
+  z_owned_closure_hello_t _ret_closure_hello;
+    z_closure_hello(&_ret_closure_hello, hello_handler, NULL, NULL);
+    z_result_t _ret_res = z_scout(z_config_move(_ret_sconfig), z_closure_hello_move(&_ret_closure_hello), NULL);
+  return true;
+}
+
 bool ZenohNode::declarePublisher(const char* keyExpr){
   // Declare Zenoh publisher
     syslog.information.print("Declaring publisher for ");
