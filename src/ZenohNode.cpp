@@ -56,12 +56,60 @@ bool ZenohNode::begin(const char* locator, const char* mode)
 
     delay(300);
 
-
   
   running = true;
   return true;
 }
 
+bool ZenohNode::setMdns(char* name){
+  if (!MDNS.begin(name)) {
+    Serial.println("Error setting up MDNS responder!");
+    return false;
+  }
+  MDNS.addService("_http", "_tcp", 80);
+  return true;
+
+}
+
+void mdns_print_results(mdns_result_t * results) {
+	mdns_result_t * r = results;
+	mdns_ip_addr_t * a = NULL;
+	int i = 1, t;
+	while (r) {
+		if (r->instance_name) {
+			printf("  PTR : %s\n", r->instance_name);
+		}
+		if (r->hostname) {
+			printf("  SRV : %s.local:%u\n", r->hostname, r->port);
+		}
+		if (r->txt_count) {
+			printf("  TXT : [%u] ", r->txt_count);
+			for (t = 0; t<r->txt_count; t++) {
+				printf("%s=%s; ", r->txt[t].key, r->txt[t].value);
+			}
+			printf("\n");
+		}
+		a = r->addr;
+		while (a) {
+			if (a->addr.type==IPADDR_TYPE_V6) {
+				printf("  IPV6: " IPV6STR "\n", IPV62STR(a->addr.u_addr.ip6));
+			}
+			else {
+				printf("  IPV4   : " IPSTR "\n", IP2STR(&(a->addr.u_addr.ip4)));
+			}
+			a = a->next;
+		}
+		r = r->next;
+	}
+}
+
+void getMDNShosts(){
+//esp_err_t mdns_query_ptr(const char *service_type, const char *proto, uint32_t timeout, size_t max_results, mdns_result_t **results)
+
+  mdns_result_t *results = NULL;
+  mdns_query_ptr("_http", "_tcp", 5000, 20, &results);
+  mdns_print_results(results);
+}
 volatile unsigned int hellos = 0;
 void hello_handler(z_loaned_hello_t *hello, void *arg) {
     syslog.debug.println("hello handler");
@@ -71,13 +119,12 @@ void hello_handler(z_loaned_hello_t *hello, void *arg) {
     //array of strings
     //  tcp/[fe80::5eb2:37ec:94d7:5860]:42863
     //  tcp/10.1.1.40:42863
-
+    getMDNShosts();
     // Process each locator  
     size_t len = z_string_array_len(locators);  
     for (size_t i = 0; i < len; i++) {  
         const z_loaned_string_t *locator_str = z_string_array_get(locators, i);  
         printf("Locator: %.*s\n", (int)z_string_len(locator_str), z_string_data(locator_str));  
-        MDNS.
     }  
     //syslog.debug.printf("Found : %s\n",locators[0]),
     hellos++;
