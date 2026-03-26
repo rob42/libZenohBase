@@ -1,6 +1,7 @@
 #include "ZenohNode.h"
 
 z_owned_session_t s;
+z_owned_querier_t hostnameQuerier;
 //z_owned_publisher_t pub;
 //z_owned_subscriber_t sub;
 Hashtable <String, z_owned_subscriber_t> subscribers;
@@ -160,6 +161,21 @@ void hostnameQHandler(_z_query_rc_t *query, void *arg) {
     z_query_reply(query, z_query_keyexpr(query), z_bytes_move(&payload), NULL);  
 }
 
+void hostnameReplyHandler(z_loaned_reply_t *reply, void *arg ){
+    syslog.debug.println("hostname Reply Handler");
+        if (z_reply_is_ok(reply)) {  
+        const z_loaned_sample_t *sample = z_reply_ok(reply);  
+        
+        z_owned_string_t value;  
+        z_bytes_to_string(z_sample_payload(sample), &value);  
+        syslog.debug.printf("  Hostname : %s", z_string_data(z_string_loan(&value)));
+    } else {  
+        // Handle error reply  
+        syslog.error.println("hostname Reply Handler failed");
+    }  
+
+}
+
 void ZenohNode::setHostname(const char* name){
   hostname = name;
 }
@@ -174,6 +190,14 @@ bool ZenohNode::declareHostnameQuery(){
     z_owned_fifo_handler_query_t h1;
     z_fifo_channel_query_new(&cb1, &h1, 16);
     z_declare_queryable(z_session_loan(&s), &q1, z_view_keyexpr_loan(&ke1), z_closure_query_move(&cb1), NULL);
+
+    //declare querier too
+      
+    z_declare_querier(z_session_loan(&s), &hostnameQuerier, z_view_keyexpr_loan(&ke1), NULL);  
+    z_owned_closure_reply_t callback;
+    z_closure_reply(&callback, hostnameReplyHandler, NULL, NULL);
+    z_querier_get(z_querier_loan(&hostnameQuerier), "", z_closure_reply_move(&callback), NULL);
+
   return true;
 }
 
