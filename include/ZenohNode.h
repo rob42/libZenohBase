@@ -3,8 +3,12 @@
 
 #include <Arduino.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <stddef.h>
 #include <zenoh-pico.h>
+#include "zenoh-pico/api/macros.h"
 #include <PicoSyslog.h>
 #include <Hashtable.h>
 #include <signalk.h>
@@ -77,8 +81,14 @@ public:
 
   static void data_handler(z_loaned_sample_t *sample, void *arg);
 
+  bool declareHostnameQuery();
+
+  void setHostname(const char* hostname);
+
+  bool getPeerHostnames(JsonArray peerNames);
+
   bool declarePublisher(const char* keyExpr);
-  
+
   // Check whether the node is currently running.
   bool isRunning() const;
 

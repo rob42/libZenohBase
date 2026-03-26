@@ -16,6 +16,7 @@
 
 // remote syslog server for logs
 #define RSYSLOG_IP "cbr.local"
+#define NODENAME "base" //override later
 
 //zenoh
 // Peer mode values (comment/uncomment as needed)

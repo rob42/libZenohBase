@@ -9,6 +9,8 @@ Hashtable <String, ZenohMessageCallback> subscriberCallback;
 //need hashtable to hold key<>publisher map.
 Hashtable <String, z_owned_publisher_t> publishers;
 
+const char* hostname;
+
 ZenohNode::ZenohNode()
   : running(false) //, callback(nullptr)
 {
@@ -110,6 +112,7 @@ void getMDNShosts(){
   mdns_query_ptr("_http", "_tcp", 5000, 20, &results);
   mdns_print_results(results);
 }
+
 volatile unsigned int hellos = 0;
 void hello_handler(z_loaned_hello_t *hello, void *arg) {
     syslog.debug.println("hello handler");
@@ -140,6 +143,37 @@ bool ZenohNode::getZenohPeers(JsonArray peers){
   syslog.debug.println("execute scouting in getZenohPeers");
   z_scout(z_config_move(&_ret_sconfig), z_closure_hello_move(&_ret_closure_hello), NULL);
   syslog.debug.printf("Found %d peers\n", hellos);
+  return true;
+}
+
+bool ZenohNode::getPeerHostnames(JsonArray peerNames){
+  syslog.debug.println("getPeerHostnames");
+  return true;
+}
+
+void hostnameQHandler(_z_query_rc_t *query, void *arg) {
+    syslog.debug.println("hostname Query Handler");
+    //(void)query;
+    //(void)(arg);
+    z_owned_bytes_t payload;  
+    z_bytes_copy_from_str(&payload, hostname);  
+    z_query_reply(query, z_query_keyexpr(query), z_bytes_move(&payload), NULL);  
+}
+
+void ZenohNode::setHostname(const char* name){
+  hostname = name;
+}
+
+bool ZenohNode::declareHostnameQuery(){
+  z_view_keyexpr_t ke1;
+    z_view_keyexpr_from_str(&ke1, "info/hostname");
+
+    z_owned_queryable_t q1;
+    z_owned_closure_query_t cb1;
+    z_closure_query(&cb1, hostnameQHandler,NULL, NULL);
+    z_owned_fifo_handler_query_t h1;
+    z_fifo_channel_query_new(&cb1, &h1, 16);
+    z_declare_queryable(z_session_loan(&s), &q1, z_view_keyexpr_loan(&ke1), z_closure_query_move(&cb1), NULL);
   return true;
 }
 

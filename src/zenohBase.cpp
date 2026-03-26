@@ -48,11 +48,13 @@ void onZenohMessage(const char *topic, const char *payload, size_t len)
 
 void initZenoh()
 {
+  zenoh.setHostname(NODENAME);
   if (!zenoh.begin(ZENOH_LOCATOR, ZENOH_MODE))
   {
     syslog.error.println("Zenoh setup failed!");
     return;
   }
+  zenoh.declareHostnameQuery();
   
 }
 
