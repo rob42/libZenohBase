@@ -13,15 +13,16 @@
 #include <time.h>
 #include <ESP32Time.h>
 #include <signalk.h>
+#include <ESPmDNS.h>
 
 // remote syslog server for logs
 #define RSYSLOG_IP "cbr.local"
-#define NODENAME "base" //override later
+//#define NODENAME "base" //override later
 
 //zenoh
 // Peer mode values (comment/uncomment as needed)
 #define ZENOH_MODE "peer"
-#define ZENOH_LOCATOR "udp/224.0.0.123:7447#iface=eth0" //in peer mode it MUST have #iface=eth0
+#define ZENOH_LOCATOR "udp/224.0.0.123:7447#iface=1" //in peer mode it MUST have #iface=[ifname], use 1 for esp32
 
 // zenoh key that is published.
 //#define KEYEXPR "null"
@@ -44,12 +45,14 @@ extern const int daylightOffset_sec;  // Adjust if DST is in effect, 0 = no, 360
 extern ESP32Time rtc;
 
 // Initialize base subsystems: WiFi, OTA, WebServer, Zenoh, Syslog
-void baseInit();
+void baseInit(const char *hostname);
 
 // Run periodic base tasks (publishing, OTA handling, web updates)
 void baseLoopTasks();
 
 // NMEA2000 OnOpen callback (kept in base because it only references the scheduler)
 void OnN2kOpen();
+
+void getMDNShosts();
 
 #endif

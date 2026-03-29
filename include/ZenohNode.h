@@ -8,22 +8,23 @@
 #include <string.h>
 #include <stddef.h>
 #include <zenoh-pico.h>
-#include "zenoh-pico/api/macros.h"
 #include <PicoSyslog.h>
 #include <Hashtable.h>
 #include <signalk.h>
 #include <ArduinoJson.h>
-#include <ESPmDNS.h>
+
 
 // Peer mode values (comment/uncomment as needed)
 #define ZENOH_MODE "peer"
-#define ZENOH_LOCATOR "udp/224.0.0.123:7447#iface=eth0" //in peer mode it MUST have #iface=eth0
-//scout doesnt work in peer, flips to tcp and crashes.
+//#define ZENOH_LOCATOR "udp/224.0.0.123:7447#iface=eth0" //in peer mode it MUST have #iface=eth0
+//#define ZENOH_LOCATOR "udp/224.0.0.123:7447"
 
 // Client mode values (comment/uncomment as needed)
 //#define ZENOH_MODE "client"
 //#define ZENOH_LOCATOR "tcp/192.168.1.125:7447" 
 //#define ZENOH_LOCATOR "" // If empty, it will scout
+
+#define INFO_HOSTNAME "info/hostname"
 
 extern PicoSyslog::Logger syslog;
 typedef void (*ZenohMessageCallback)(const char* topic, const char* payload, size_t len);
@@ -45,8 +46,6 @@ public:
 
   //true is session is alive
   bool checkSession();
-
-  bool setMdns(char* name);
 
   bool getZenohPeers(JsonArray peers);
 
@@ -85,7 +84,7 @@ public:
 
   void setHostname(const char* hostname);
 
-  bool getPeerHostnames(JsonArray peerNames);
+  bool getPeerHostnames();
 
   bool declarePublisher(const char* keyExpr);
 

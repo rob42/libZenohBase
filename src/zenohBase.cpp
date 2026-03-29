@@ -31,6 +31,58 @@ ESP32Time rtc(gmtOffset_sec);
  }
  #endif
  
+ bool setMdns(const char* name){
+  if (!MDNS.begin(name)) {
+    Serial.println("Error setting up MDNS responder!");
+    return false;
+  }
+  MDNS.addService("_http", "_tcp", 80);
+  return true;
+
+}
+
+void mdns_print_results(mdns_result_t * results) {
+	mdns_result_t * r = results;
+	mdns_ip_addr_t * a = NULL;
+	int i = 1, t;
+	while (r) {
+		if (r->instance_name) {
+			syslog.debug.printf("  PTR : %s\n", r->instance_name);
+		}
+		if (r->hostname) {
+			syslog.debug.printf("  SRV : %s.local:%u\n", r->hostname, r->port);
+		}
+		if (r->txt_count) {
+			syslog.debug.printf("  TXT : [%u] ", r->txt_count);
+			for (t = 0; t<r->txt_count; t++) {
+				syslog.debug.printf("%s=%s; ", r->txt[t].key, r->txt[t].value);
+			}
+			syslog.debug.printf("\n");
+		}
+		a = r->addr;
+		while (a) {
+			if (a->addr.type==IPADDR_TYPE_V6) {
+				syslog.debug.printf("  IPV6: " IPV6STR "\n", IPV62STR(a->addr.u_addr.ip6));
+			}
+			else {
+				syslog.debug.printf("  IPV4   : " IPSTR "\n", IP2STR(&(a->addr.u_addr.ip4)));
+			}
+			a = a->next;
+		}
+		r = r->next;
+	}
+}
+
+void getMDNShosts(){
+//esp_err_t mdns_query_ptr(const char *service_type, const char *proto, uint32_t timeout, size_t max_results, mdns_result_t **results)
+
+  mdns_result_t *results = NULL;
+  mdns_query_ptr("_http", "_tcp", 5000, 20, &results);
+  mdns_print_results(results);
+  mdns_query_results_free(results);
+
+}
+
 // Simple message callback matching ZenohMessageCallback
 void onZenohMessage(const char *topic, const char *payload, size_t len)
 {
@@ -46,9 +98,9 @@ void onZenohMessage(const char *topic, const char *payload, size_t len)
   syslog.debug.println();
 }
 
-void initZenoh()
+void initZenoh(const char *hostname)
 {
-  zenoh.setHostname(NODENAME);
+  zenoh.setHostname(hostname);
   if (!zenoh.begin(ZENOH_LOCATOR, ZENOH_MODE))
   {
     syslog.error.println("Zenoh setup failed!");
@@ -139,7 +191,7 @@ void configWifi(){
   Serial.println("Config server stopped");
 }
 
-void baseInit()
+void baseInit(const char *hostname)
 {
   Serial.begin(115200);
   syslog.server = RSYSLOG_IP;
@@ -174,7 +226,7 @@ void baseInit()
   }
   delay(1000);
   syslog.print("Wifi connected : ");
-  syslog.println(wifiNode.getIP());
+   syslog.println(wifiNode.getIP());
 
   initOTA();
 
@@ -189,13 +241,22 @@ void baseInit()
   syslog.println(rtc.getDateTime());
 
   webServerNode.init();
+  ArduinoOTA.setHostname(hostname);
+  initZenoh(hostname);
+  setMdns(hostname);
 
-  initZenoh();
 }
 
+long baseLast = millis();
 
 void baseLoopTasks()
 {
+  //every 30 secs print memory free
+  if( (millis() - baseLast)>30000){
+    u_int32_t mem = esp_get_free_heap_size();
+    syslog.debug.printf( "Free Memory: %d\n", mem);
+    baseLast = millis();
+  }
   webServerNode.update();
   ArduinoOTA.handle();
 }

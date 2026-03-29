@@ -1,7 +1,7 @@
 #include "ZenohNode.h"
 
 z_owned_session_t s;
-z_owned_querier_t hostnameQuerier;
+
 //z_owned_publisher_t pub;
 //z_owned_subscriber_t sub;
 Hashtable <String, z_owned_subscriber_t> subscribers;
@@ -28,15 +28,19 @@ bool ZenohNode::begin(const char* locator, const char* mode)
   syslog.information.print("Initialize Zenoh Session and other parameters...");
     z_owned_config_t config;
     z_config_default(&config);
+    zp_config_insert(z_config_loan_mut(&config), Z_CONFIG_LISTEN_KEY, locator);  
     zp_config_insert(z_config_loan_mut(&config), Z_CONFIG_MODE_KEY, mode);
-    if (strcmp(locator, "") != 0) {
-        if (strcmp(mode, "client") == 0) {
-            zp_config_insert(z_config_loan_mut(&config), Z_CONFIG_CONNECT_KEY, locator);
-        } else {
-            zp_config_insert(z_config_loan_mut(&config), Z_CONFIG_LISTEN_KEY, locator);
-        }
-    }
+    zp_config_insert(z_config_loan_mut(&config), Z_CONFIG_MULTICAST_SCOUTING_KEY, "true");
+
+    // if (strcmp(locator, "") != 0) {
+    //     if (strcmp(mode, "client") == 0) {
+    //         zp_config_insert(z_config_loan_mut(&config), Z_CONFIG_CONNECT_KEY, locator);
+    //     } else {
+    //         zp_config_insert(z_config_loan_mut(&config), Z_CONFIG_LISTEN_KEY, locator);
+    //     }
+    // }
     syslog.information.println("OK");
+    
     
     // Open Zenoh session
     syslog.information.print("Opening Zenoh Session...");
@@ -64,116 +68,96 @@ bool ZenohNode::begin(const char* locator, const char* mode)
   return true;
 }
 
-bool ZenohNode::setMdns(char* name){
-  if (!MDNS.begin(name)) {
-    Serial.println("Error setting up MDNS responder!");
-    return false;
-  }
-  MDNS.addService("_http", "_tcp", 80);
-  return true;
+// Callback function to handle each peer ID  
+volatile unsigned int zids = 0;  
+void zid_handler(const z_id_t *id, void *arg) {  
+    (void)arg;  // Unused context  
+      
+    // Convert the ID to a string for printing  
+    z_owned_string_t id_str;  
+    z_id_to_string(id, &id_str);  
+      
+    // Print the peer ID  
+    syslog.debug.printf("Peer ID: %.*s\n", (int)z_string_len(z_string_loan(&id_str)), z_string_data(z_string_loan(&id_str)));  
+      
+    // Clean up the string  
+    z_string_drop(z_string_move(&id_str));  
+      
+    zids++;  
+}  
 
-}
-
-void mdns_print_results(mdns_result_t * results) {
-	mdns_result_t * r = results;
-	mdns_ip_addr_t * a = NULL;
-	int i = 1, t;
-	while (r) {
-		if (r->instance_name) {
-			printf("  PTR : %s\n", r->instance_name);
-		}
-		if (r->hostname) {
-			printf("  SRV : %s.local:%u\n", r->hostname, r->port);
-		}
-		if (r->txt_count) {
-			printf("  TXT : [%u] ", r->txt_count);
-			for (t = 0; t<r->txt_count; t++) {
-				printf("%s=%s; ", r->txt[t].key, r->txt[t].value);
-			}
-			printf("\n");
-		}
-		a = r->addr;
-		while (a) {
-			if (a->addr.type==IPADDR_TYPE_V6) {
-				printf("  IPV6: " IPV6STR "\n", IPV62STR(a->addr.u_addr.ip6));
-			}
-			else {
-				printf("  IPV4   : " IPSTR "\n", IP2STR(&(a->addr.u_addr.ip4)));
-			}
-			a = a->next;
-		}
-		r = r->next;
-	}
-}
-
-void getMDNShosts(){
-//esp_err_t mdns_query_ptr(const char *service_type, const char *proto, uint32_t timeout, size_t max_results, mdns_result_t **results)
-
-  mdns_result_t *results = NULL;
-  mdns_query_ptr("_http", "_tcp", 5000, 20, &results);
-  mdns_print_results(results);
-}
-
-volatile unsigned int hellos = 0;
-void hello_handler(z_loaned_hello_t *hello, void *arg) {
-    syslog.debug.println("hello handler");
-    (void)hello;
-    (void)(arg);
-    const z_loaned_string_array_t *locators = zp_hello_locators(hello);
-    //array of strings
-    //  tcp/[fe80::5eb2:37ec:94d7:5860]:42863
-    //  tcp/10.1.1.40:42863
-    getMDNShosts();
-    // Process each locator  
-    size_t len = z_string_array_len(locators);  
-    for (size_t i = 0; i < len; i++) {  
-        const z_loaned_string_t *locator_str = z_string_array_get(locators, i);  
-        printf("Locator: %.*s\n", (int)z_string_len(locator_str), z_string_data(locator_str));  
-    }  
-    //syslog.debug.printf("Found : %s\n",locators[0]),
-    hellos++;
-}
-
-bool ZenohNode::getZenohPeers(JsonArray peers){
-  syslog.debug.println("getZenohPeers");
-  hellos=0;
-  z_owned_config_t _ret_sconfig;
-  z_config_default(&_ret_sconfig);
-  z_owned_closure_hello_t _ret_closure_hello;
-  z_closure_hello(&_ret_closure_hello, hello_handler, NULL, NULL);
-  syslog.debug.println("execute scouting in getZenohPeers");
-  z_scout(z_config_move(&_ret_sconfig), z_closure_hello_move(&_ret_closure_hello), NULL);
-  syslog.debug.printf("Found %d peers\n", hellos);
-  return true;
-}
-
-bool ZenohNode::getPeerHostnames(JsonArray peerNames){
-  syslog.debug.println("getPeerHostnames");
-  return true;
-}
-
-void hostnameQHandler(_z_query_rc_t *query, void *arg) {
+void hostnameQueryHandler(_z_query_rc_t *query, void *arg) {
     syslog.debug.println("hostname Query Handler");
-    //(void)query;
-    //(void)(arg);
+    (void)query;
+    (void)(arg);
     z_owned_bytes_t payload;  
     z_bytes_copy_from_str(&payload, hostname);  
-    z_query_reply(query, z_query_keyexpr(query), z_bytes_move(&payload), NULL);  
+    z_result_t r =  z_query_reply(query, z_query_keyexpr(query), z_bytes_move(&payload), NULL); 
+    //payload dropped in z_query_reply
+    syslog.debug.printf("  hostnameQueryHandler replied: %s\n", r ? "failed" : "OK");
 }
 
 void hostnameReplyHandler(z_loaned_reply_t *reply, void *arg ){
     syslog.debug.println("hostname Reply Handler");
-        if (z_reply_is_ok(reply)) {  
+    if (z_reply_is_ok(reply)) {  
         const z_loaned_sample_t *sample = z_reply_ok(reply);  
         
         z_owned_string_t value;  
         z_bytes_to_string(z_sample_payload(sample), &value);  
-        syslog.debug.printf("  Hostname : %s", z_string_data(z_string_loan(&value)));
+        
+        const z_loaned_string_t *loaned = z_string_loan(&value);
+        syslog.debug.printf("  Hostname : %.*s\n", (int)z_string_len(loaned), z_string_data(loaned));
+        
+        // Clean up the string  
+        z_string_drop(z_string_move(&value)); 
+        
     } else {  
         // Handle error reply  
-        syslog.error.println("hostname Reply Handler failed");
+        syslog.error.println(" hostname Reply Handler failed");
     }  
+}
 
+bool ZenohNode::getPeerHostnames(){
+  syslog.debug.println("getPeerHostnames");
+
+    z_get_options_t options;  
+    z_get_options_default(&options);  
+  //   options.target = Z_QUERY_TARGET_ALL;              // Target all matching queryables  
+  //   options.consolidation.mode = Z_CONSOLIDATION_MODE_AUTO; // Reply consolidation  
+     options.timeout_ms = 1000;                        // Timeout in milliseconds
+
+  z_view_keyexpr_t ke1;
+  z_view_keyexpr_from_str(&ke1, INFO_HOSTNAME);
+
+  z_owned_closure_reply_t callback;
+
+  z_result_t r = z_closure_reply(&callback, hostnameReplyHandler, NULL, NULL);
+  //syslog.debug.printf("  create getPeerHostnames closure : %s\n", r ? "failed" : "OK");
+
+  z_result_t res = z_get(z_session_loan(&s), z_view_keyexpr_loan(&ke1), "", z_closure_reply_move(&callback), &options);  
+      
+  syslog.debug.printf("Hostname query:%s\n",res ? "failed" : "OK");
+  z_closure_reply_drop(z_closure_reply_move(&callback));
+  return true;
+}
+
+bool ZenohNode::getZenohPeers(JsonArray peers){
+  syslog.debug.println("getZenohPeers");
+  zids=0;
+      z_owned_closure_zid_t closure;  
+    z_closure_zid(&closure, zid_handler, NULL, NULL);  
+      
+    // Fetch and print all peer IDs  
+    syslog.debug.printf("Fetching peer IDs...\n");  
+    z_result_t result = z_info_peers_zid(z_session_loan(&s), z_closure_zid_move(&closure));  
+      
+    if (result == 0) {  
+        syslog.debug.printf("Found %u peer(s)\n", zids);  
+    } else {  
+        syslog.debug.printf("Error fetching peer IDs: %d\n", result);  
+    }  
+    z_closure_zid_drop(z_closure_zid_move(&closure));
+    return true;
 }
 
 void ZenohNode::setHostname(const char* name){
@@ -182,21 +166,20 @@ void ZenohNode::setHostname(const char* name){
 
 bool ZenohNode::declareHostnameQuery(){
   z_view_keyexpr_t ke1;
-    z_view_keyexpr_from_str(&ke1, "info/hostname");
+  z_view_keyexpr_from_str(&ke1, INFO_HOSTNAME);
 
-    z_owned_queryable_t q1;
-    z_owned_closure_query_t cb1;
-    z_closure_query(&cb1, hostnameQHandler,NULL, NULL);
-    z_owned_fifo_handler_query_t h1;
-    z_fifo_channel_query_new(&cb1, &h1, 16);
-    z_declare_queryable(z_session_loan(&s), &q1, z_view_keyexpr_loan(&ke1), z_closure_query_move(&cb1), NULL);
+  //z_owned_queryable_t q1;
+  z_owned_closure_query_t cb1;
+  z_result_t rc = z_closure_query(&cb1, hostnameQueryHandler,NULL, NULL);
+  syslog.debug.printf("Declared hostnameQueryHandler:%s\n",rc ? "failed" : "OK");
 
-    //declare querier too
-      
-    z_declare_querier(z_session_loan(&s), &hostnameQuerier, z_view_keyexpr_loan(&ke1), NULL);  
-    z_owned_closure_reply_t callback;
-    z_closure_reply(&callback, hostnameReplyHandler, NULL, NULL);
-    z_querier_get(z_querier_loan(&hostnameQuerier), "", z_closure_reply_move(&callback), NULL);
+  // z_owned_fifo_handler_query_t h1;
+  // z_result_t rf = z_fifo_channel_query_new(&cb1, &h1, 16);
+  // syslog.debug.printf("Declared fifo:%s\n",rc ? "failed" : "OK");
+
+  z_result_t r =  z_declare_background_queryable(z_session_loan(&s), z_view_keyexpr_loan(&ke1), z_closure_query_move(&cb1), NULL);
+  syslog.debug.printf("Declared hostname query:%s\n",r ? "failed" : "OK");
+    
 
   return true;
 }
@@ -259,6 +242,7 @@ bool ZenohNode::publishZbytes(const char* topic, const char* payloadStr){
       return false;
   }
   // Assume publish succeeds.
+   z_bytes_drop(z_bytes_move(&payload));
   return true;
 }
 
@@ -340,14 +324,14 @@ void ZenohNode::data_handler(z_loaned_sample_t *sample, void *arg) {
     ZenohMessageCallback* callback =  subscriberCallback.get(key);
     if(callback == nullptr){
       syslog.debug.printf(" >> [Subscription listener] no callback for %s\n",key);
-      return;
-    }
-    (*callback)(key,  
+      
+    }else{
+      (*callback)(key,  
           z_string_data(z_string_loan(&value)),
           z_string_len(z_string_loan(&value)));
-
+    }
     z_string_drop(z_string_move(&value));
-}
+  }
 
 bool ZenohNode::subscribe(const char* topic, ZenohMessageCallback cb)
 {
@@ -380,8 +364,9 @@ bool ZenohNode::subscribe(const char* topic, ZenohMessageCallback cb)
 
     // Store callback 
     subscriberCallback.put(topic, cb);
-
+    
     syslog.information.println("OK");
+    
   return true;
 }
 
