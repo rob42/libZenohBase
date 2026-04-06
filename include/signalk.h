@@ -10,6 +10,7 @@
 #define KEY_ENVIRONMENT_WIND_ANGLETRUEGROUND  "environment/wind/angleTrueGround"
 #define KEY_ENVIRONMENT_WIND_ANGLETRUEWATER  "environment/wind/angleTrueWater"
 #define KEY_ENVIRONMENT_WIND_SPEEDAPPARENT  "environment/wind/speedApparent"
+#define KEY_ENVIRONMENT_WIND_SPEEDAPPARENTMAX  "environment/wind/speedApparentMax"
 #define KEY_ENVIRONMENT_WIND_SPEEDTRUE  "environment/wind/speedTrue"
 #define KEY_NAVIGATION_COURSEOVERGROUNDTRUE  "navigation/courseOverGroundTrue"
 #define KEY_NAVIGATION_GNSS_DIFFERENTIALAGE  "navigation/gnss/differentialAge"

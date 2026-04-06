@@ -82,7 +82,7 @@ public:
         //syslog.debug.printf("Key: %s, size: %d \n",str, s+1);
         JsonObject tmp = webReadings.as<JsonObject>();
         JsonObject prev; 
-        tok = strtok_r(ref, ".",&ref);
+        tok = strtok_r(ref, "/",&ref);
          while (tok != NULL){
             //first one
             //syslog.debug.println(tok);
@@ -96,7 +96,7 @@ public:
                 }
                 
            // }
-            tok = strtok_r(NULL, ".",&ref);
+            tok = strtok_r(NULL, "/",&ref);
         }
         //tmp should now be the leaf
         prev[prevTok] = value;
