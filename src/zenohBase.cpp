@@ -195,7 +195,7 @@ void baseInit(const char *hostname)
 {
   Serial.begin(115200);
   syslog.server = RSYSLOG_IP;
-  syslog.default_loglevel = PicoSyslog::LogLevel::debug;
+  syslog.default_loglevel = PicoSyslog::LogLevel::critical;
   //check if wifi is configured
   preferences.begin("nvs", false);
   String ssid = preferences.getString("ssid", "");
@@ -248,14 +248,15 @@ void baseInit(const char *hostname)
 }
 
 long baseLast = millis();
+long memLast = millis();
 
 void baseLoopTasks()
 {
   //every 30 secs print memory free
-  if( (millis() - baseLast)>30000){
+  if( (millis() - memLast)>60000){
     u_int32_t mem = esp_get_free_heap_size();
     syslog.debug.printf( "Free Memory: %u\n", mem);
-    baseLast = millis();
+    memLast = millis();
   }
   webServerNode.update();
   ArduinoOTA.handle();
