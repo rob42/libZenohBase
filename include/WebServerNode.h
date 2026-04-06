@@ -100,7 +100,7 @@ public:
         }
         //tmp should now be the leaf
         prev[prevTok] = value;
-        //syslog.debug.printf("done: %s = %d\n", prevTok, value);
+        //syslog.debug.printf("done: %s = %f\n", prevTok, value);
     }
 
 

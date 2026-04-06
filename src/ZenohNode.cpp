@@ -259,7 +259,7 @@ bool ZenohNode::publish(const char* topic, double pLoad)
 {
   if(!checkSession())return false;
  
-  syslog.debug.printf("ZenohNode: publish to %s : %d \n", topic,pLoad);
+  syslog.debug.printf("ZenohNode: publish to %s : %f \n", topic,pLoad);
 
   return publishZbytes(topic,String(pLoad).c_str());
 }
@@ -268,7 +268,7 @@ bool ZenohNode::publish(const char* topic, double pLoad)
 bool ZenohNode::publish(const char* topic, float pLoad){
   if(!checkSession())return false;
  
-  syslog.debug.printf("ZenohNode: publish to %s : %d \n", topic,pLoad);
+  syslog.debug.printf("ZenohNode: publish to %s : %f \n", topic,pLoad);
   return publishZbytes(topic,String(pLoad).c_str());
 }
 
