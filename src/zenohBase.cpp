@@ -196,6 +196,7 @@ void baseInit(const char *hostname)
   Serial.begin(115200);
   syslog.server = RSYSLOG_IP;
   syslog.default_loglevel = PicoSyslog::LogLevel::critical;
+  
   //check if wifi is configured
   preferences.begin("nvs", false);
   String ssid = preferences.getString("ssid", "");

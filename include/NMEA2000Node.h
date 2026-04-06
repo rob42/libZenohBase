@@ -112,7 +112,7 @@ public:
         SetN2kWindSpeed(N2kMsg, seq, windSpeed, windAngle, N2kWind_Apparent);
         if (NMEA2000.SendMsg(N2kMsg))
         {
-                syslog.debug.printf("Bus ID: %c sent n2k message",NMEA2000.GetN2kSource());
+                syslog.debug.printf("Bus ID: %c sent n2k message\n",NMEA2000.GetN2kSource());
         }
         incrementSeq();
     }
@@ -122,7 +122,7 @@ public:
         SetN2kWindSpeed(N2kMsg, seq, windSpeed, windAngle, N2kWind_True_boat);
         if (NMEA2000.SendMsg(N2kMsg))
         {
-        syslog.debug.printf("Bus ID: %c sent n2k message",NMEA2000.GetN2kSource());
+        syslog.debug.printf("Bus ID: %c sent n2k message\n",NMEA2000.GetN2kSource());
         }
         incrementSeq();
     }
