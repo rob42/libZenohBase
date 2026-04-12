@@ -311,15 +311,23 @@ bool ZenohNode::publish(const char* topic, bool pLoad){
 
 */
 void ZenohNode::data_handler(z_loaned_sample_t *sample, void *arg) {
-    z_view_string_t keystr;
-    z_keyexpr_as_view_string(z_sample_keyexpr(sample), &keystr);
+      // Get key expression from sample  
+    const z_loaned_keyexpr_t *keyexpr = z_sample_keyexpr(sample);  
+      
+    // Convert key expression to string view  
+    z_view_string_t key_str;  
+    z_keyexpr_as_view_string(keyexpr, &key_str);  
+    int len = z_string_len(z_view_string_loan(&key_str));
+    
+    // Get null-terminated key
+    char key[len+1] {'\0'};
+    strncpy(key, (const char *)z_string_data(z_view_string_loan(&key_str)), len);  
 
     z_owned_string_t value;
     z_bytes_to_string(z_sample_payload(sample), &value);
 
-    syslog.debug.printf(" >> [Subscription listener] Received ( %s, %s )\n", &keystr, &value);
+    syslog.debug.printf(" >> [Subscription listener] Received ( %s, %s )\n", key, &value);
   
-    const char* key = z_string_data(z_view_string_loan(&keystr));
     
     ZenohMessageCallback* callback =  subscriberCallback.get(key);
     if(callback == nullptr){
@@ -330,6 +338,8 @@ void ZenohNode::data_handler(z_loaned_sample_t *sample, void *arg) {
           z_string_data(z_string_loan(&value)),
           z_string_len(z_string_loan(&value)));
     }
+    // Clean up when done  
+        
     z_string_drop(z_string_move(&value));
   }
 
