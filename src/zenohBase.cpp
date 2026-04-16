@@ -191,11 +191,11 @@ void configWifi(){
   Serial.println("Config server stopped");
 }
 
-void baseInit(const char *hostname)
+void baseInit(const char *hostname, const char *rsyslog, PicoSyslog::LogLevel level )
 {
   Serial.begin(115200);
-  syslog.server = RSYSLOG_IP;
-  syslog.default_loglevel = PicoSyslog::LogLevel::critical;
+  syslog.server = rsyslog;
+  syslog.default_loglevel = level;
   
   //check if wifi is configured
   preferences.begin("nvs", false);

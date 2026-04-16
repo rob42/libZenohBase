@@ -15,9 +15,6 @@
 #include <signalk.h>
 #include <ESPmDNS.h>
 
-// remote syslog server for logs
-#define RSYSLOG_IP ""
-//#define NODENAME "base" //override later
 
 //zenoh
 // Peer mode values (comment/uncomment as needed)
@@ -45,7 +42,7 @@ extern const int daylightOffset_sec;  // Adjust if DST is in effect, 0 = no, 360
 extern ESP32Time rtc;
 
 // Initialize base subsystems: WiFi, OTA, WebServer, Zenoh, Syslog
-void baseInit(const char *hostname);
+void baseInit(const char *hostname, const char *rsyslog, PicoSyslog::LogLevel level );
 
 // Run periodic base tasks (publishing, OTA handling, web updates)
 void baseLoopTasks();
