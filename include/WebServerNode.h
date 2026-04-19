@@ -71,7 +71,7 @@ public:
         }
     }
 
-    void setSensorData(char *key, double value){
+    void setSensorData(const char *key, double value){
         int s = strlen(key);
         char str[s+1];
         strcpy(str,key);
