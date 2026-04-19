@@ -235,6 +235,13 @@ bool ZenohNode::checkSession(){
 
 
 bool ZenohNode::publishZbytes(const char* topic, const char* payloadStr){
+  
+  if(!checkSession())return false;
+
+  if(!publishers.containsKey(topic)){
+    syslog.error.printf("Error: no publisher for: %s\n", topic);
+    return false;
+  }
   z_owned_bytes_t payload;
   z_bytes_copy_from_str(&payload, payloadStr);
   if (z_publisher_put(z_publisher_loan(publishers.get(topic)), z_bytes_move(&payload), NULL) < 0) {
@@ -248,8 +255,6 @@ bool ZenohNode::publishZbytes(const char* topic, const char* payloadStr){
 
 bool ZenohNode::publish(const char* topic, const char* pLoad)
 {
-  if(!checkSession())return false;
- 
   syslog.debug.printf("ZenohNode: publish to %s : %s\n", topic,pLoad);
   return publishZbytes(topic,pLoad);
 }
@@ -257,42 +262,30 @@ bool ZenohNode::publish(const char* topic, const char* pLoad)
 // Convenience overload for null-terminated payloads (double).
 bool ZenohNode::publish(const char* topic, double pLoad)
 {
-  if(!checkSession())return false;
- 
-  syslog.debug.printf("ZenohNode: publish to %s : %f \n", topic,pLoad);
-
+ syslog.debug.printf("ZenohNode: publish to %s : %f \n", topic,pLoad);
   return publishZbytes(topic,String(pLoad).c_str());
 }
 
 // Convenience overload for null-terminated payloads (float).
 bool ZenohNode::publish(const char* topic, float pLoad){
-  if(!checkSession())return false;
- 
   syslog.debug.printf("ZenohNode: publish to %s : %f \n", topic,pLoad);
   return publishZbytes(topic,String(pLoad).c_str());
 }
 
 // Convenience overload for null-terminated payloads (int).
 bool ZenohNode::publish(const char* topic, int pLoad){
-  if(!checkSession())return false;
- 
   syslog.debug.printf("ZenohNode: publish to %s : %d \n", topic,pLoad);
-
   return publishZbytes(topic,String(pLoad).c_str());
 }
 
 // Convenience overload for null-terminated payloads (long).
 bool ZenohNode::publish(const char* topic, long pLoad){
-  if(!checkSession())return false;
- 
   syslog.debug.printf("ZenohNode: publish to %s : %d \n", topic,pLoad);
   return publishZbytes(topic,String(pLoad).c_str());
 }
 
 // Convenience overload for null-terminated payloads (long).
 bool ZenohNode::publish(const char* topic, bool pLoad){
-  if(!checkSession())return false;
- 
   syslog.debug.printf("ZenohNode: publish to %s : %d \n", topic,pLoad);
   return publishZbytes(topic,String(pLoad).c_str());
 }
