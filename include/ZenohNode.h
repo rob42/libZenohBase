@@ -12,6 +12,7 @@
 #include <Hashtable.h>
 #include <signalk.h>
 #include <ArduinoJson.h>
+#include <SimpleVector.h>
 
 
 // Peer mode values (comment/uncomment as needed)
@@ -44,6 +45,8 @@ public:
   // Stop the node and free resources.
   void end();
 
+  SimpleVector<char*> getHosts();
+  
   //true is session is alive
   bool checkSession();
 
@@ -84,7 +87,7 @@ public:
 
   void setHostname(const char* hostname);
 
-  bool getPeerHostnames();
+  bool getPeerHostnames(JsonArray names);
 
   bool declarePublisher(const char* keyExpr);
 

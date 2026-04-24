@@ -10,6 +10,8 @@ Hashtable <String, ZenohMessageCallback> subscriberCallback;
 //need hashtable to hold key<>publisher map.
 Hashtable <String, z_owned_publisher_t> publishers;
 
+SimpleVector<char*> hosts ;
+
 const char* hostname;
 
 ZenohNode::ZenohNode()
@@ -106,8 +108,13 @@ void hostnameReplyHandler(z_loaned_reply_t *reply, void *arg ){
         z_bytes_to_string(z_sample_payload(sample), &value);  
         
         const z_loaned_string_t *loaned = z_string_loan(&value);
-        syslog.debug.printf("  Hostname : %.*s\n", (int)z_string_len(loaned), z_string_data(loaned));
-        
+        int len = (int)z_string_len(loaned);
+        const char* name = z_string_data(loaned);
+        syslog.debug.printf("  Hostname : %.*s\n", len, name);
+        char host[len+1] {'\0'};
+        strncpy(host,name,len);
+        //remove from json
+        hosts.put(host);
         // Clean up the string  
         z_string_drop(z_string_move(&value)); 
         
@@ -117,7 +124,11 @@ void hostnameReplyHandler(z_loaned_reply_t *reply, void *arg ){
     }  
 }
 
-bool ZenohNode::getPeerHostnames(){
+SimpleVector<char*> ZenohNode::getHosts(){
+  return hosts;
+}
+
+bool ZenohNode::getPeerHostnames(JsonArray names){
   syslog.debug.println("getPeerHostnames");
 
     z_get_options_t options;  

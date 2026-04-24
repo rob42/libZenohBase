@@ -248,6 +248,15 @@ void baseInit(const char *hostname, const char *rsyslog, PicoSyslog::LogLevel le
 
 }
 
+void updateHosts(){
+  SimpleVector<char*> hosts = zenoh.getHosts();
+  JsonArray jsHosts = webServerNode.jsonHosts.as<JsonArray>();
+  jsHosts.clear();
+  for(int i=0;i<hosts.size();i++){
+    jsHosts.add(hosts.get(i));
+  }
+}
+
 long baseLast = millis();
 long memLast = millis();
 
@@ -258,7 +267,10 @@ void baseLoopTasks()
     u_int32_t mem = esp_get_free_heap_size();
     syslog.debug.printf( "Free Memory: %u\n", mem);
     memLast = millis();
+    updateHosts();
   }
+
+  
   webServerNode.update();
   ArduinoOTA.handle();
 }

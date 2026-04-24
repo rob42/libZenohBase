@@ -8,6 +8,7 @@
 #include <functional>
 #include <WiFi.h>
 #include <PicoSyslog.h>
+#include <SimpleVector.h> 
 
 extern PicoSyslog::Logger syslog;
 
@@ -22,6 +23,7 @@ public:
     AsyncEventSource events;
     // Json Variable to hold data (Sensor Readings)
     JsonDocument webReadings = JsonDocument();
+    JsonDocument jsonHosts = JsonDocument();
 
     unsigned long webLastTime = 0;
     unsigned long webTimerDelay = 1000;
@@ -41,12 +43,21 @@ public:
         server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
                   { request->send(LittleFS, "/index.html", "text/html"); });
         server.serveStatic("/", LittleFS, "/");
+        
         server.on("/readings", HTTP_GET, [this](AsyncWebServerRequest *request)
             {
             int n = measureJson(webReadings);
             char json[n];
             serializeJson(webReadings, json ,n+1);
             request->send(200, "application/json", json); });
+        
+        server.on("/menu", HTTP_GET, [this](AsyncWebServerRequest *request)
+            {    
+            int n = measureJson(jsonHosts);
+            char json[n];
+            serializeJson(jsonHosts, json ,n+1);
+            request->send(200, "application/json", json); });
+        
         events.onConnect([](AsyncEventSourceClient *client)
                 {
             if(client->lastId()) {
