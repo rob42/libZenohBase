@@ -250,10 +250,10 @@ void baseInit(const char *hostname, const char *rsyslog, PicoSyslog::LogLevel le
 
 void updateHosts(){
   SimpleVector<char*> hosts = zenoh.getHosts();
-  JsonArray jsHosts = webServerNode.jsonHosts.as<JsonArray>();
-  jsHosts.clear();
+  syslog.debug.printf("Zenoh Hosts: %d\n",hosts.size());
   for(int i=0;i<hosts.size();i++){
-    jsHosts.add(hosts.get(i));
+    syslog.debug.printf("Web Host: %s\n");
+    webServerNode.addHost(hosts.get(i));
   }
 }
 

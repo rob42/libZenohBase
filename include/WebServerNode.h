@@ -82,6 +82,10 @@ public:
         }
     }
 
+    void addHost(char* host){
+        jsonHosts.as<JsonArray>().add(host);
+    }
+
     void setSensorData(const char *key, double value){
         int s = strlen(key);
         char str[s+1];
