@@ -82,7 +82,7 @@ public:
         }
     }
 
-    void addHost(char* host){
+    void addHost(const char* host){
         jsonHosts.as<JsonArray>().add(host);
     }
 

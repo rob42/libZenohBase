@@ -249,12 +249,14 @@ void baseInit(const char *hostname, const char *rsyslog, PicoSyslog::LogLevel le
 }
 
 void updateHosts(){
-  SimpleVector<char*> hosts = zenoh.getHosts();
-  syslog.debug.printf("Zenoh Hosts: %d\n",hosts.size());
-  for(int i=0;i<hosts.size();i++){
+  List<char*> hosts;
+  zenoh.getHosts(hosts);
+  syslog.debug.printf("Zenoh Hosts: %d\n",hosts.Count());
+  for(int i=0;i<hosts.Count();i++){
     syslog.debug.printf("Web Host: %s\n");
-    webServerNode.addHost(hosts.get(i));
+    webServerNode.addHost(hosts[i]);
   }
+  hosts.~List();
 }
 
 long baseLast = millis();

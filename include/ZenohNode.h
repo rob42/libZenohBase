@@ -12,7 +12,7 @@
 #include <Hashtable.h>
 #include <signalk.h>
 #include <ArduinoJson.h>
-#include <SimpleVector.h>
+#include "ListLib.h"
 
 
 // Peer mode values (comment/uncomment as needed)
@@ -45,7 +45,7 @@ public:
   // Stop the node and free resources.
   void end();
 
-  SimpleVector<char*> getHosts();
+  void getHosts(List<char*>);
   
   //true is session is alive
   bool checkSession();

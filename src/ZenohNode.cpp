@@ -99,6 +99,8 @@ void hostnameQueryHandler(_z_query_rc_t *query, void *arg) {
     syslog.debug.printf("  hostnameQueryHandler replied: %s\n", r ? "failed" : "OK");
 }
 
+List<char*> hostsFound;
+
 void hostnameReplyHandler(z_loaned_reply_t *reply, void *arg ){
     syslog.debug.println("hostname Reply Handler");
     if (z_reply_is_ok(reply)) {  
@@ -109,14 +111,15 @@ void hostnameReplyHandler(z_loaned_reply_t *reply, void *arg ){
         
         const z_loaned_string_t *loaned = z_string_loan(&value);
         int len = (int)z_string_len(loaned);
-        const char* name = z_string_data(loaned);
-        syslog.debug.printf("  Hostname : %.*s\n", len, name);
-        char host[len+1] {'\0'};
-        strncpy(host,name,len);
-        //remove from json
-        hosts.put(host);
+        //const char* name = z_string_data(loaned);
+           char host[len+1] {'\0'};
+        strncpy(host,z_string_data(loaned),len);
         // Clean up the string  
         z_string_drop(z_string_move(&value)); 
+
+        syslog.debug.printf("  Hostname : %s\n", host);
+        hostsFound.Add(host);
+        
         
     } else {  
         // Handle error reply  
@@ -124,8 +127,12 @@ void hostnameReplyHandler(z_loaned_reply_t *reply, void *arg ){
     }  
 }
 
-SimpleVector<char*> ZenohNode::getHosts(){
-  return hosts;
+
+void ZenohNode::getHosts(List<char*> hosts){
+  for(int i=0;i<hostsFound.Count();i++){
+    if(hostsFound[i] == NULL) continue;
+     hosts.Add(hostsFound[i]);
+  }
 }
 
 bool ZenohNode::getPeerHostnames(JsonArray names){
