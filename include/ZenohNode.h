@@ -87,7 +87,7 @@ public:
 
   void setHostname(const char* hostname);
 
-  bool getPeerHostnames(JsonArray names);
+  bool getPeerHostnames();
 
   bool declarePublisher(const char* keyExpr);
 

@@ -14,6 +14,8 @@ SimpleVector<char*> hosts ;
 
 const char* hostname;
 
+List<char*> hostsFound;
+
 ZenohNode::ZenohNode()
   : running(false) //, callback(nullptr)
 {
@@ -99,7 +101,7 @@ void hostnameQueryHandler(_z_query_rc_t *query, void *arg) {
     syslog.debug.printf("  hostnameQueryHandler replied: %s\n", r ? "failed" : "OK");
 }
 
-List<char*> hostsFound;
+
 
 void hostnameReplyHandler(z_loaned_reply_t *reply, void *arg ){
     syslog.debug.println("hostname Reply Handler");
@@ -135,7 +137,7 @@ void ZenohNode::getHosts(List<char*> hosts){
   }
 }
 
-bool ZenohNode::getPeerHostnames(JsonArray names){
+bool ZenohNode::getPeerHostnames(){
   syslog.debug.println("getPeerHostnames");
 
     z_get_options_t options;  

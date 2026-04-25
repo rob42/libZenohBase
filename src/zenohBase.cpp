@@ -265,10 +265,11 @@ long memLast = millis();
 void baseLoopTasks()
 {
   //every 30 secs print memory free
-  if( (millis() - memLast)>60000){
+  if( (millis() - memLast)>20000){
     u_int32_t mem = esp_get_free_heap_size();
     syslog.debug.printf( "Free Memory: %u\n", mem);
     memLast = millis();
+    zenoh.getPeerHostnames();
     updateHosts();
   }
 
