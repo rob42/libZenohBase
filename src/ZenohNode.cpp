@@ -10,8 +10,6 @@ Hashtable <String, ZenohMessageCallback> subscriberCallback;
 //need hashtable to hold key<>publisher map.
 Hashtable <String, z_owned_publisher_t> publishers;
 
-SimpleVector<char*> hosts ;
-
 const char* hostname;
 
 List<char*> hostsFound;
@@ -114,7 +112,7 @@ void hostnameReplyHandler(z_loaned_reply_t *reply, void *arg ){
         const z_loaned_string_t *loaned = z_string_loan(&value);
         int len = (int)z_string_len(loaned);
         //const char* name = z_string_data(loaned);
-           char host[len+1] {'\0'};
+        char host[len+1] {'\0'};
         strncpy(host,z_string_data(loaned),len);
         // Clean up the string  
         z_string_drop(z_string_move(&value)); 
@@ -131,10 +129,21 @@ void hostnameReplyHandler(z_loaned_reply_t *reply, void *arg ){
 
 
 void ZenohNode::getHosts(List<char*> hosts){
-  for(int i=0;i<hostsFound.Count();i++){
-    if(hostsFound[i] == NULL) continue;
-     hosts.Add(hostsFound[i]);
+  syslog.debug.println("getHosts");
+  
+  if(hostsFound.IsEmpty()){
+    syslog.debug.println("hostsFound isEmpty");
+    return;
   }
+  // for(int i=0;i<hostsFound.Count();i++){
+  //   syslog.debug.printf("getHosts entry: %d\n", i);
+    
+  //   if(hostsFound[i] == NULL) continue;
+    syslog.debug.print("getHosts entry: ");
+    syslog.println(hostsFound[0]);
+    // hosts.Add(hostsFound[i]);
+ // }
+  return;
 }
 
 bool ZenohNode::getPeerHostnames(){

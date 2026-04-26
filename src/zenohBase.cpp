@@ -249,19 +249,24 @@ void baseInit(const char *hostname, const char *rsyslog, PicoSyslog::LogLevel le
 }
 
 void updateHosts(){
-  List<char*> hosts;
-  zenoh.getHosts(hosts);
+  syslog.debug.println("updateHosts");
+  List<char*> hosts ;
+  //zenoh.getHosts(hosts);
+  if(hosts.IsEmpty()){
+    syslog.debug.printf("updateHosts isEmpty\n");
+    return;
+  }
   syslog.debug.printf("Zenoh Hosts: %d\n",hosts.Count());
   for(int i=0;i<hosts.Count();i++){
     syslog.debug.printf("Web Host: %s\n");
     webServerNode.addHost(hosts[i]);
   }
-  hosts.~List();
+  //hosts.~List();
 }
 
 long baseLast = millis();
 long memLast = millis();
-
+bool toggle = true;
 void baseLoopTasks()
 {
   //every 30 secs print memory free
@@ -269,8 +274,12 @@ void baseLoopTasks()
     u_int32_t mem = esp_get_free_heap_size();
     syslog.debug.printf( "Free Memory: %u\n", mem);
     memLast = millis();
-    zenoh.getPeerHostnames();
-    updateHosts();
+     if(toggle){
+      zenoh.getPeerHostnames();
+    }else{
+      //updateHosts();
+    }
+    toggle=!toggle;
   }
 
   
