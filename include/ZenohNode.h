@@ -45,7 +45,7 @@ public:
   // Stop the node and free resources.
   void end();
 
-  void getHosts(List<char*>);
+  List<String>* getHosts();
   
   //true is session is alive
   bool checkSession();

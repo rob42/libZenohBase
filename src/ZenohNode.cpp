@@ -12,7 +12,7 @@ Hashtable <String, z_owned_publisher_t> publishers;
 
 const char* hostname;
 
-List<char*> hostsFound;
+List<String> hostsFound;
 
 ZenohNode::ZenohNode()
   : running(false) //, callback(nullptr)
@@ -112,14 +112,16 @@ void hostnameReplyHandler(z_loaned_reply_t *reply, void *arg ){
         const z_loaned_string_t *loaned = z_string_loan(&value);
         int len = (int)z_string_len(loaned);
         //const char* name = z_string_data(loaned);
-        char host[len+1] {'\0'};
+        char host[len+1] = {'\0'};
         strncpy(host,z_string_data(loaned),len);
         // Clean up the string  
         z_string_drop(z_string_move(&value)); 
-
+        String hostStr = String(host);
         syslog.debug.printf("  Hostname : %s\n", host);
-        hostsFound.Add(host);
-        
+        if(hostsFound.Contains(hostStr)) return;
+        //new host
+        hostsFound.Add(hostStr);
+        syslog.debug.printf("  Added: %s\n", hostsFound.Last());
         
     } else {  
         // Handle error reply  
@@ -128,22 +130,10 @@ void hostnameReplyHandler(z_loaned_reply_t *reply, void *arg ){
 }
 
 
-void ZenohNode::getHosts(List<char*> hosts){
+List<String>* ZenohNode::getHosts(){
   syslog.debug.println("getHosts");
   
-  if(hostsFound.IsEmpty()){
-    syslog.debug.println("hostsFound isEmpty");
-    return;
-  }
-  // for(int i=0;i<hostsFound.Count();i++){
-  //   syslog.debug.printf("getHosts entry: %d\n", i);
-    
-  //   if(hostsFound[i] == NULL) continue;
-    syslog.debug.print("getHosts entry: ");
-    syslog.println(hostsFound[0]);
-    // hosts.Add(hostsFound[i]);
- // }
-  return;
+  return &hostsFound;
 }
 
 bool ZenohNode::getPeerHostnames(){
@@ -348,7 +338,7 @@ void ZenohNode::data_handler(z_loaned_sample_t *sample, void *arg) {
     z_owned_string_t value;
     z_bytes_to_string(z_sample_payload(sample), &value);
 
-    syslog.debug.printf(" >> [Subscription listener] Received ( %s, %s )\n", key, &value);
+    //syslog.debug.printf(" >> [Subscription listener] Received ( %s, %s )\n", key, &value);
   
     
     ZenohMessageCallback* callback =  subscriberCallback.get(key);

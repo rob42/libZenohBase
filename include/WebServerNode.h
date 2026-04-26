@@ -83,7 +83,8 @@ public:
     }
 
     void addHost(const char* host){
-        jsonHosts.as<JsonArray>().add(host);
+        //syslog.debug.printf("Webserver added %s\n", host);
+        jsonHosts.add(host);
     }
 
     void setSensorData(const char *key, double value){

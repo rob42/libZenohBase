@@ -250,18 +250,19 @@ void baseInit(const char *hostname, const char *rsyslog, PicoSyslog::LogLevel le
 
 void updateHosts(){
   syslog.debug.println("updateHosts");
-  List<char*> hosts ;
-  //zenoh.getHosts(hosts);
-  if(hosts.IsEmpty()){
+  
+  List<String>* hosts = zenoh.getHosts();
+  if(hosts->IsEmpty()){
     syslog.debug.printf("updateHosts isEmpty\n");
     return;
   }
-  syslog.debug.printf("Zenoh Hosts: %d\n",hosts.Count());
-  for(int i=0;i<hosts.Count();i++){
-    syslog.debug.printf("Web Host: %s\n");
-    webServerNode.addHost(hosts[i]);
+  webServerNode.jsonHosts.clear();
+   syslog.debug.printf("Zenoh Hosts: %d\n",hosts->Count());
+  for(int i=0;i<hosts->Count();i++){
+    String h = hosts->ToArray()[i];
+    syslog.debug.printf("Web Host: %s\n", h);
+    webServerNode.addHost(h.c_str());
   }
-  //hosts.~List();
 }
 
 long baseLast = millis();
