@@ -248,6 +248,16 @@ void baseInit(const char *hostname, const char *rsyslog, PicoSyslog::LogLevel le
 
 }
 
+void expireReadings(){
+  syslog.debug.println("expireReadings");
+  for (JsonPair kv : readings.as<JsonObject>()) {
+    syslog.debug.println(kv.key().c_str());  
+    syslog.debug.println(kv.value()[KEY_VALUE].as<long>()); 
+    syslog.debug.println(kv.value()[KEY_TIMEOUT].as<long>()); 
+  }
+
+
+}
 void updateHosts(){
   syslog.debug.println("updateHosts");
   
@@ -280,6 +290,7 @@ void baseLoopTasks()
     }else{
       updateHosts();
     }
+    expireReadings();
     toggle=!toggle;
   }
 
