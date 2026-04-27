@@ -272,6 +272,7 @@ void expireReadings(){
   if(!expiredKeys.IsEmpty()){
     for(int x=0;x<expiredKeys.Count();x++){
       readings.as<JsonObject>().remove(expiredKeys[x].c_str());
+      webServerNode.dropSensorData(expiredKeys[x].c_str());
       syslog.debug.printf("removed %s\n",expiredKeys[x].c_str());
     }
   }

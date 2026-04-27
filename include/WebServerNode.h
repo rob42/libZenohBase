@@ -119,6 +119,38 @@ public:
         //syslog.debug.printf("done: %s = %f\n", prevTok, value);
     }
 
+    void dropSensorData(const char *key){
+        int s = strlen(key);
+        char str[s+1];
+        strcpy(str,key);
+        char *ref = &str[0];
+        char *tok;
+        char *prevTok;
+       
+        //syslog.debug.printf("Key: %s, size: %d \n",str, s+1);
+        JsonObject tmp = webReadings.as<JsonObject>();
+        JsonObject prev; 
+        tok = strtok_r(ref, "/",&ref);
+         while (tok != NULL){
+            //first one
+            //syslog.debug.println(tok);
+            prevTok = tok;
+           // if(!tmp.isNull()) {
+                prev = tmp;
+                if(tmp[tok].is<JsonObject>()){
+                    tmp = tmp[tok];
+                }else{
+                    tmp = tmp[tok].to<JsonObject>();
+                }
+                
+           // }
+            tok = strtok_r(NULL, "/",&ref);
+        }
+        //tmp should now be the leaf
+        prev.remove(prevTok);
+        //syslog.debug.printf("done: %s = %f\n", prevTok, value);
+    }
+
 
 };
 #endif
