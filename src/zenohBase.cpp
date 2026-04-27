@@ -248,20 +248,35 @@ void baseInit(const char *hostname, const char *rsyslog, PicoSyslog::LogLevel le
 
 }
 
+List<String> expiredKeys;
 void expireReadings(){
+  
   syslog.debug.println("expireReadings");
+  
   for (JsonPair kv : readings.as<JsonObject>()) {
-    unsigned long timeout = kv.value()[KEY_TIMEOUT].as<long>();
-    syslog.debug.println(kv.key().c_str());  
-    syslog.debug.println(kv.value()[KEY_VALUE].as<long>()); 
-    syslog.debug.println(timeout); 
-    if(millis() > timeout + 1000 ){
-      readings.remove(kv.key());
-      syslog.debug.println("removed");
+
+    JsonVariant val = kv.value();  
+    const char* key = kv.key().c_str();
+    unsigned long timeout = val[KEY_TIMEOUT].as<unsigned long>();
+
+    syslog.debug.printf("Key: %s\n", key);
+    syslog.debug.printf("Key value: %f\n",val[KEY_VALUE].as<double>()); 
+    syslog.debug.printf("Key timeout: %i\n",timeout); 
+    syslog.debug.printf("Sys Millis: %i\n",millis()); 
+    if(millis() > (timeout + 60000) ){
+      syslog.debug.printf("mark to remove %s\n", key);
+      expiredKeys.Add(String(key));
     }
   }
-
-
+  //now delete them
+  if(!expiredKeys.IsEmpty()){
+    for(int x=0;x<expiredKeys.Count();x++){
+      readings.as<JsonObject>().remove(expiredKeys[x].c_str());
+      syslog.debug.printf("removed %s\n",expiredKeys[x].c_str());
+    }
+  }
+  expiredKeys.Clear();
+ 
 }
 void updateHosts(){
   syslog.debug.println("updateHosts");
