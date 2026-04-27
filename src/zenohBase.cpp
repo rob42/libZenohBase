@@ -278,7 +278,7 @@ void baseLoopTasks()
      if(toggle){
       zenoh.getPeerHostnames();
     }else{
-      //updateHosts();
+      updateHosts();
     }
     toggle=!toggle;
   }

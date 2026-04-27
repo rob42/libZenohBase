@@ -1,6 +1,8 @@
 #ifndef SIGKNALK_H
 #define SIGKNALK_H
 // zenoh key that is published.
+#define KEY_VALUE "value"
+#define KEY_TIMEOUT "timeout"
 #define KEY_ENVIRONMENT_DEPTH_BELOWSURFACE  "environment/depth/belowSurface"
 #define KEY_ENVIRONMENT_DEPTH_BELOWTRANSDUCER  "environment/depth/belowTransducer"
 #define KEY_ENVIRONMENT_OUTSIDE_PRESSURE  "environment/outside/pressure"
