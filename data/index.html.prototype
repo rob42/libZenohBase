@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>WIND</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script src="gauge.min.js"></script>
+  </head>
+  <!-- main header and nav hamburger -->
+  <header class="main-header">
+    <div class="main-logo">
+      <h1>WIND GAUGE</h1>
+    </div>
+    <nav id="nav" class="main-nav" >
+      <div class="link-header"><span>Other Devices:</span></div>
+      <div id="nav-items" class="nav-links" >
+        <a class="link-item" href="#" >Link1</a>
+      </div>
+    </nav>
+    <button id="button-menu" class="button-menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </header>
+  <!-- main header and nav hamburger ends -->
+  <body>
+    
+    <!--<div class="content">
+      <div class="card-grid">
+        <div class="card">
+          <p class="card-title">AWA</p>
+          <canvas id="gauge-awa"></canvas>
+          <div class="large-text">
+          	<span id="label-aws">--.-</span>
+          </div>
+          <div class="medium-text">
+          	<span>Max</span><span id="label-aws-max">--.-</span><span>knots</span>
+          </div>
+        </div>
+        <!--<div class="card">
+          <p class="card-title">AWS</p>
+          <canvas id="gauge-aws"></canvas>
+        </div>-->
+        
+      </div>
+      
+    </div>-->
+    <script src="script.js"></script>
+  </body>
+</html>
